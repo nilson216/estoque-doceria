@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -71,7 +71,7 @@ const SignupPage = () => {
       return response.data
     },
   })
-  const methods = useForm({
+  const form = useForm({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       firstName: '',
@@ -82,6 +82,26 @@ const SignupPage = () => {
       termsAccepted: false,
     },
   })
+  useEffect(() => {
+    const init = async () => {
+      try {
+      const accessToken = localStorage.getItem('accessToken')
+      const refreshToken = localStorage.getItem('refreshToken')
+      if (!accessToken && !refreshToken) return
+      const response = await api.get('/users/me', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      setUser(response.data) 
+      } catch(error) {
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        console.error('Error retrieving tokens from localStorage', error)
+      } 
+    }
+    init()
+  }, [])
 
   const handleSubmit = (data) => {
     signupMutation.mutate(data, {
@@ -103,8 +123,8 @@ const SignupPage = () => {
   }
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-3">
-      <Form {...methods}>
-        <form onSubmit={methods.handleSubmit(handleSubmit)}>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
           <Card className="w-[500px] border-none bg-transparent p-2 shadow-none">
             <CardHeader className="text-center">
               <CardTitle>Crie a sua conta</CardTitle>
@@ -115,7 +135,7 @@ const SignupPage = () => {
               {/** First Name Field */}
               <FormField
                 name="firstName"
-                control={methods.control}
+                control={form.control}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nome</FormLabel>
@@ -133,7 +153,7 @@ const SignupPage = () => {
               {/** Last Name Field */}
               <FormField
                 name="lastName"
-                control={methods.control}
+                control={form.control}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Sobrenome</FormLabel>
@@ -151,7 +171,7 @@ const SignupPage = () => {
               {/** Email Field */}
               <FormField
                 name="email"
-                control={methods.control}
+                control={form.control}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>E-mail</FormLabel>
@@ -169,7 +189,7 @@ const SignupPage = () => {
               {/** Password Field */}
               <FormField
                 name="password"
-                control={methods.control}
+                control={form.control}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Senha</FormLabel>
@@ -186,7 +206,7 @@ const SignupPage = () => {
               {/** Password Confirmation Field */}
               <FormField
                 name="passwordConfirmation"
-                control={methods.control}
+                control={form.control}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Confirmação de senha</FormLabel>
@@ -203,7 +223,7 @@ const SignupPage = () => {
               {/** Terms and Conditions Checkbox */}
               <FormField
                 name="termsAccepted"
-                control={methods.control}
+                control={form.control}
                 render={({ field }) => (
                   <FormItem className="items-top flex gap-2 space-y-0">
                     <FormControl>
@@ -215,12 +235,12 @@ const SignupPage = () => {
                     <div className="leading-none">
                       <Label
                         htmlFor="terms"
-                        className={`text-xs text-muted-foreground opacity-75 ${methods.formState.errors.termsAccepted && 'text-red-500'}`}
+                        className={`text-xs text-muted-foreground opacity-75 ${form.formState.errors.termsAccepted && 'text-red-500'}`}
                       >
                         Ao clicar em &quot;Criar conta&quot;, você concorda com{' '}
                         <a
                           href="/"
-                          className={`text-white underline ${methods.formState.errors.termsAccepted && 'text-red-500'}`}
+                          className={`text-white underline ${form.formState.errors.termsAccepted && 'text-red-500'}`}
                         >
                           nosso termo de uso e política de privacidade.
                         </a>
