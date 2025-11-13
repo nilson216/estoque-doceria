@@ -49,6 +49,13 @@ const signupSchema = z.object({
     message: 'Você deve aceitar os termos de uso e política de privacidade',
   }),
 })
+.refine(
+  (data) => data.password === data.passwordConfirmation,
+  {
+  message: 'As senhas não coincidem',
+  path: ['passwordConfirmation'],
+})
+
 
 const SignupPage = () => {
   const [user, setUser] = useState(null)
