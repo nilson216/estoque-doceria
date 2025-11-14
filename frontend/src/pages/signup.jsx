@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useContext, } from 'react'
+import { useContext } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { z } from 'zod'
 
 import PasswordInput from '@/components/password-input'
@@ -25,39 +25,39 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { AuthContext } from '@/contexts/auth'
+import { useAuthContext } from '@/contexts/auth'
 
-
-const signupSchema = z.object({
-  firstName: z.string().trim().min(1, { message: 'O nome é obrigatório' }),
-  lastName: z.string().trim().min(1, { message: 'O sobrenome é obrigatório' }),
-  email: z
-    .string()
-    .trim()
-    .min(1, { message: 'O e-mail é obrigatório' })
-    .email({ message: 'E-mail inválido' }),
-  password: z
-    .string()
-    .trim()
-    .min(6, { message: 'A senha deve ter no mínimo 6 caracteres' }),
-  passwordConfirmation: z
-    .string()
-    .trim()
-    .min(6, { message: 'A confirmação de senha é obrigatória' }),
-  termsAccepted: z.boolean().refine((val) => val === true, {
-    message: 'Você deve aceitar os termos de uso e política de privacidade',
-  }),
-})
-.refine(
-  (data) => data.password === data.passwordConfirmation,
-  {
-  message: 'As senhas não coincidem',
-  path: ['passwordConfirmation'],
-})
-
+const signupSchema = z
+  .object({
+    firstName: z.string().trim().min(1, { message: 'O nome é obrigatório' }),
+    lastName: z
+      .string()
+      .trim()
+      .min(1, { message: 'O sobrenome é obrigatório' }),
+    email: z
+      .string()
+      .trim()
+      .min(1, { message: 'O e-mail é obrigatório' })
+      .email({ message: 'E-mail inválido' }),
+    password: z
+      .string()
+      .trim()
+      .min(6, { message: 'A senha deve ter no mínimo 6 caracteres' }),
+    passwordConfirmation: z
+      .string()
+      .trim()
+      .min(6, { message: 'A confirmação de senha é obrigatória' }),
+    termsAccepted: z.boolean().refine((val) => val === true, {
+      message: 'Você deve aceitar os termos de uso e política de privacidade',
+    }),
+  })
+  .refine((data) => data.password === data.passwordConfirmation, {
+    message: 'As senhas não coincidem',
+    path: ['passwordConfirmation'],
+  })
 
 const SignupPage = () => {
-  const { user, signup } = useContext(AuthContext)
+  const { user, signup, isInitializing } = useContext(useAuthContext)
 
   const form = useForm({
     resolver: zodResolver(signupSchema),
@@ -70,12 +70,13 @@ const SignupPage = () => {
       termsAccepted: false,
     },
   })
-  
 
   const handleSubmit = (data) => signup(data)
-  
+ 
+  if (isInitializing) return null;
+   
   if (user) {
-     return <h1>Ola, {user.first_name}</h1>
+    return <Navigate to="/"/>
   }
 
   return (

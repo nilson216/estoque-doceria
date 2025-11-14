@@ -1,30 +1,32 @@
-import { useMutation } from '@tanstack/react-query';
-import { createContext, useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { useMutation } from '@tanstack/react-query'
+import { createContext, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
-import { api } from '@/lib/axios';
+import { api } from '@/lib/axios'
 
-export const AuthContext = createContext({
+export const useAuthContext = createContext({
   user: null,
+  isInitializing: true,
   login: () => {},
   signup: () => {},
-});
+})
 
-const LOCAL_STORAGE_ACCESS_TOKEN_KEY = 'accessToken';
-const LOCAL_STORAGE_REFRESH_TOKEN_KEY = 'refreshToken';
+const LOCAL_STORAGE_ACCESS_TOKEN_KEY = 'accessToken'
+const LOCAL_STORAGE_REFRESH_TOKEN_KEY = 'refreshToken'
 
 const setTokens = (tokens) => {
-  localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, tokens.accessToken);
-  localStorage.setItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY, tokens.refreshToken);
+  localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, tokens.accessToken)
+  localStorage.setItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY, tokens.refreshToken)
 }
 
 const removeTokens = () => {
-  localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY);
-  localStorage.removeItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY);
+  localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY)
+  localStorage.removeItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY)
 }
 
 export const AuthContextProvider = ({ children }) => {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState()
+  const [isInitializing, setIsInitializing] = useState(true)
 
   const signupMutation = useMutation({
     mutationKey: ['signup'],
@@ -34,10 +36,10 @@ export const AuthContextProvider = ({ children }) => {
         last_name: variables.lastName,
         email: variables.email,
         password: variables.password,
-      });
-      return response.data;
+      })
+      return response.data
     },
-  });
+  })
 
   const loginMutation = useMutation({
     mutationKey: ['login'],
@@ -45,64 +47,70 @@ export const AuthContextProvider = ({ children }) => {
       const response = await api.post('/users/login', {
         email: variables.email,
         password: variables.password,
-      });
-      return response.data;
+      })
+      return response.data
     },
-  });
+  })
 
   useEffect(() => {
     const init = async () => {
       try {
-        const accessToken = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY);
-        const refreshToken = localStorage.getItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY);
+        setIsInitializing(true)
+        const accessToken = localStorage.getItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY)
+        const refreshToken = localStorage.getItem(
+          LOCAL_STORAGE_REFRESH_TOKEN_KEY
+        )
 
-        if (!accessToken && !refreshToken) return;
+        if (!accessToken && !refreshToken) return
 
         const response = await api.get('/users/me', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        });
+        })
 
-        setUser(response.data);
+        setUser(response.data)
       } catch (error) {
-        removeTokens();
-        console.error('Error retrieving tokens from localStorage', error);
+        setUser(null)
+        removeTokens()
+        console.error('Error retrieving tokens from localStorage', error)
+      } finally {
+        setIsInitializing(false)
       }
-    };
+    }
 
-    init();
-  }, []);
+    init()
+  }, [])
 
   const signup = (data) => {
     signupMutation.mutate(data, {
       onSuccess: (createdUser) => {
-        setUser(createdUser);
-        setTokens(createdUser.tokens);
-        toast.success('Conta criada com sucesso!');
+        setUser(createdUser)
+        setTokens(createdUser.tokens)
+        toast.success('Conta criada com sucesso!')
       },
       onError: () => {
-        toast.error('Erro ao criar a conta. Tente novamente.');
+        toast.error('Erro ao criar a conta. Tente novamente.')
       },
-    });
-  };
+    })
+  }
 
   const login = (data) => {
     loginMutation.mutate(data, {
       onSuccess: (loggedUser) => {
-        setTokens(loggedUser.tokens);
-        setUser(loggedUser);
-        toast.success('Conta logada com sucesso!');
+        setTokens(loggedUser.tokens)
+        setUser(loggedUser)
+        toast.success('Conta logada com sucesso!')
       },
       onError: () => {
-        toast.error('Erro ao fazer login. Tente novamente.');
+        toast.error('Erro ao fazer login. Tente novamente.')
       },
-    });
-  };
+    })
+  }
 
   return (
-    <AuthContext.Provider value={{ user, login, signup }}>
+    <useAuthContext.Provider value={{ user, login, signup, isInitializing }}>
       {children}
-    </AuthContext.Provider>
-  );
-};
+    </useAuthContext.Provider>
+  )
+}
