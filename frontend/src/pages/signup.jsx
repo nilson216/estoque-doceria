@@ -198,7 +198,7 @@ const SignupPage = () => {
                         Ao clicar em &quot;Criar conta&quot;, você concorda com{' '}
                         <a
                           href="/"
-                          className={`text-white underline ${form.formState.errors.termsAccepted && 'text-red-500'}`}
+                          className={`text-pink-400 underline ${form.formState.errors.termsAccepted && 'text-red-500'}`}
                         >
                           nosso termo de uso e política de privacidade.
                         </a>

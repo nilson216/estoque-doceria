@@ -54,7 +54,7 @@
 
     /* Botão de perigo */
     --destructive: 0 80% 65%;        /* vermelho rosado */
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 0 0% %;
 
     /* Borda */
     --border: 25 20% 85%;

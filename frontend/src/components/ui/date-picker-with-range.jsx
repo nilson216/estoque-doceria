@@ -1,7 +1,8 @@
 "use client"
 
 import { format } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
+import {ptBR} from 'date-fns/locale/pt-BR'
+import { Calendar as CalendarIcon } from "lucide-react" // Removi o Dice1, pois não é usado na lógica de data
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -10,25 +11,52 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
 
 
-export const DatePickerWithRange = ({value, onChange, placeholder = "Selecione uma data"}) => {
+// Nota: 'value' agora deve ser um objeto { from: Date, to: Date }
+export const DatePickerWithRange = ({ value, onChange, className, placeholder = 'Selecione uma data ' }) => {
 
   return (
-    <Popover>
+    <div className={cn('grid gap-2', className)}>
+     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          data-empty={!value}
-          className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal"
+          variant={"outline"} // Reverti para o padrão do professor (outline)
+          className={cn(
+            'w-[300px] justify-start text-left font-normal',
+            !value && 'text-muted-foreground'
+          )}
         >
-          <CalendarIcon />
-          {value ? format(value, "PPP") : <span>{placeholder}</span>}
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {value?.from ? (
+            value.to ? (
+              // Intervalo completo
+              <>
+                {format(value.from, "LLL dd, y", { locale: ptBR })} -{" "}
+                {format(value.to, "LLL dd, y", { locale: ptBR })}
+              </>
+            ) : (
+              // Apenas a data de início selecionada
+              format(value.from, "LLL dd, y", { locale: ptBR })
+            )
+          ) : (
+            // Nenhuma data selecionada
+            <span>{placeholder}</span>
+          )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
-        <Calendar mode="single" selected={value} onSelect={onChange} />
+      <PopoverContent className="w-auto p-0" align="start"> {/* Adicionei align="start" */}
+        <Calendar
+          initialFocus
+          mode="range"
+          defaultMonth={value?.from}
+          selected={value}
+          onSelect={onChange}
+          numberOfMonths={2} 
+        />
       </PopoverContent>
     </Popover>
+    </div>
   )
 }
