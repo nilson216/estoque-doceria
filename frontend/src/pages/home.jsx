@@ -16,6 +16,12 @@ const HomePage = () => {
   return (
     <>
       <Header />
+      <div className="flex justify-between items-center">\
+        <h2>Dashboard</h2>
+        <div>
+          {/* Seletor de Data e botao de novo ingrediente */}
+        </div>
+      </div>
     </>
   )
 }

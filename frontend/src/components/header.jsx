@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar"
-import { ChevronDown, ChevronDownIcon, LogOutIcon } from "lucide-react"
+import { ChevronDownIcon, LogOutIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
