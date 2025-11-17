@@ -9,6 +9,7 @@ export const useAuthContext = createContext({
   isInitializing: true,
   login: () => {},
   signup: () => {},
+  signOut: () => {},
 })
 
 const LOCAL_STORAGE_ACCESS_TOKEN_KEY = 'accessToken'
@@ -107,9 +108,12 @@ export const AuthContextProvider = ({ children }) => {
       },
     })
   }
-
+  const signOut = () => {
+    setUser(null)
+    removeTokens()
+  }
   return (
-    <useAuthContext.Provider value={{ user, login, signup, isInitializing }}>
+    <useAuthContext.Provider value={{ user, login, signup, isInitializing, signOut }}>
       {children}
     </useAuthContext.Provider>
   )
