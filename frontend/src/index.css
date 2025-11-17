@@ -83,3 +83,29 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Seu CSS atual para o avatar-custom */
+.avatar-custom {
+  background-color: hsl(var(--secondary));        /* verde menta */
+  color: hsl(var(--secondary-foreground)) !important;
+  border: 2px solid hsl(var(--primary));          /* borda rosa */
+}
+
+/* Modificações sugeridas para o avatar-custom */
+.avatar-custom {
+  /* Fundo do avatar: Preto ou um tom bem escuro para simular o FinTrack */
+  background-color: hsl(220 20% 15%); /* Um cinza escuro para o fundo do avatar, similar ao FinTrack */
+  /* Cor do texto (fallback): Branco ou um tom claro */
+  color: hsl(0 0% 100%) !important; /* Branco para o texto "FR" */
+
+  /* Remover a borda colorida se não for desejada, ou torná-la sutil */
+  border: none; /* Sem borda */
+  /* Ou, se quiser uma borda sutil, como a do FinTrack: */
+  /* border: 1px solid hsl(220 10% 30%); */ /* Uma borda cinza escura */
+
+  /* Para garantir que o avatar seja redondo */
+  border-radius: 50%; /* Torna o avatar perfeitamente redondo */
+}
+
+
+
