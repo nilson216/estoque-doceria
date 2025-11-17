@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useContext } from 'react'
+// using the provided hook from the auth context
 import { useForm } from 'react-hook-form'
 import { Link, Navigate } from 'react-router-dom'
 import { z } from 'zod'
@@ -37,7 +37,7 @@ const loginSchema = z.object({
 })
 
 const LoginPage = () => {
-  const { user, login, isInitializing} = useContext(useAuthContext)
+  const { user, login, isInitializing } = useAuthContext()
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -48,10 +48,10 @@ const LoginPage = () => {
 
   const handleSubmit = (data) => login(data)
 
-  if (isInitializing) return null;
+  if (isInitializing) return null
 
-   if (user) {
-    return <Navigate to="/"/>
+  if (user) {
+    return <Navigate to="/homepage" />
   }
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-3">

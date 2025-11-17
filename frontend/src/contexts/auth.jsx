@@ -1,10 +1,15 @@
 import { useMutation } from '@tanstack/react-query'
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import { api } from '@/lib/axios'
+import {
+  LOCAL_STORAGE_ACCESS_TOKEN_KEY,
+  LOCAL_STORAGE_REFRESH_TOKEN_KEY,
+} from '@/constants/local-storage'
+import { protectedApi, publicApi } from '@/lib/axios'
+import { UserService } from '@/services/user'
 
-export const useAuthContext = createContext({
+export const AuthContext = createContext({
   user: null,
   isInitializing: true,
   login: () => {},
@@ -12,8 +17,8 @@ export const useAuthContext = createContext({
   signOut: () => {},
 })
 
-const LOCAL_STORAGE_ACCESS_TOKEN_KEY = 'accessToken'
-const LOCAL_STORAGE_REFRESH_TOKEN_KEY = 'refreshToken'
+// Hook to consume the AuthContext
+export const useAuthContext = () => useContext(AuthContext)
 
 const setTokens = (tokens) => {
   localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, tokens.accessToken)
@@ -28,24 +33,18 @@ const removeTokens = () => {
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState()
   const [isInitializing, setIsInitializing] = useState(true)
-
   const signupMutation = useMutation({
     mutationKey: ['signup'],
     mutationFn: async (variables) => {
-      const response = await api.post('/users', {
-        first_name: variables.firstName,
-        last_name: variables.lastName,
-        email: variables.email,
-        password: variables.password,
-      })
-      return response.data
+      const response = await UserService.signup(variables)
+      return response 
     },
   })
 
   const loginMutation = useMutation({
     mutationKey: ['login'],
     mutationFn: async (variables) => {
-      const response = await api.post('/users/login', {
+      const response = await publicApi.post('/users/login', {
         email: variables.email,
         password: variables.password,
       })
@@ -64,7 +63,7 @@ export const AuthContextProvider = ({ children }) => {
 
         if (!accessToken && !refreshToken) return
 
-        const response = await api.get('/users/me', {
+        const response = await protectedApi.get('/users/me', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -95,7 +94,8 @@ export const AuthContextProvider = ({ children }) => {
       },
     })
   }
-
+// Service Pattern/Layer
+// criar um arquivo services/authService.js para colocar essa lógica
   const login = (data) => {
     loginMutation.mutate(data, {
       onSuccess: (loggedUser) => {
@@ -113,8 +113,10 @@ export const AuthContextProvider = ({ children }) => {
     removeTokens()
   }
   return (
-    <useAuthContext.Provider value={{ user, login, signup, isInitializing, signOut }}>
+    <AuthContext.Provider
+      value={{ user, login, signup, isInitializing, signOut }}
+    >
       {children}
-    </useAuthContext.Provider>
+    </AuthContext.Provider>
   )
 }

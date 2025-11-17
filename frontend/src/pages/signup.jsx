@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useContext } from 'react'
+// using the provided hook from the auth context
 import { useForm } from 'react-hook-form'
 import { Link, Navigate } from 'react-router-dom'
 import { z } from 'zod'
@@ -57,7 +57,7 @@ const signupSchema = z
   })
 
 const SignupPage = () => {
-  const { user, signup, isInitializing } = useContext(useAuthContext)
+  const { user, signup, isInitializing } = useAuthContext()
 
   const form = useForm({
     resolver: zodResolver(signupSchema),
@@ -72,11 +72,11 @@ const SignupPage = () => {
   })
 
   const handleSubmit = (data) => signup(data)
- 
-  if (isInitializing) return null;
-   
+
+  if (isInitializing) return null
+
   if (user) {
-    return <Navigate to="/"/>
+    return <Navigate to="/" />
   }
 
   return (
