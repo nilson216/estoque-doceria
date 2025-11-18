@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fontes Nunito mantidas */
+@font-face {
+  font-family: 'Nunito';
+  src: url('/src/assets/fonts/Nunito-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+/* ... (todas as outras declarações de fonte que você já tem permanecem iguais) ... */
+
+* {
+  font-family: 'Nunito', sans-serif;
+}
+
+@layer base {
+  :root {
+    /* 🎨 Paleta Tema Doceria */
+    --primary-pink: 332 78% 72%;      /* rosa cupcake */
+    --primary-brown: 25 30% 30%;      /* marrom chocolate */
+    --primary-cream: 42 95% 94%;      /* creme baunilha */
+    --mint: 150 55% 75%;              /* verde menta */
+    --yellow-candy: 48 95% 65%;       /* amarelo suave */
+
+    /* Fundo principal */
+    --background: 42 95% 96%;         /* creme clarinho */
+    --foreground: 25 30% 20%;         /* marrom escuro suave */
+
+    /* Cards */
+    --card: 0 0% 100%;                /* branco doceria */
+    --card-foreground: 25 30% 20%;
+
+    /* Popovers / Dropdown */
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 30% 20%;
+
+    /* Botões */
+    --primary: 332 78% 72%;           /* rosa pastel */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 150 55% 75%;         /* verde menta */
+    --secondary-foreground: 25 30% 20%;
+
+    /* Áreas desabilitadas / muted */
+    --muted: 42 30% 88%;             /* creme mais escuro */
+    --muted-foreground: 25 15% 35%;
+
+    /* Acento de hover */
+    --accent: 48 95% 85%;            /* amarelo doce */
+    --accent-foreground: 25 30% 20%;
+
+    /* Botão de perigo */
+    --destructive: 0 80% 65%;        /* vermelho rosado */
+    --destructive-foreground: 0 0% %;
+
+    /* Borda */
+    --border: 25 20% 85%;
+
+    /* Inputs */
+    --input: 42 30% 88%;
+    --ring: 332 78% 72%;             /* rosa pastel */
+
+    /* Raio */
+    --radius: 0.75rem;
+
+    /* Gráficos */
+    --chart-1: 332 78% 72%;  /* rosa cupcake */
+    --chart-2: 150 55% 75%;  /* menta */
+    --chart-3: 48 95% 65%;   /* amarelo doce */
+    --chart-4: 25 30% 30%;   /* chocolate */
+    --chart-5: 15 70% 70%;   /* pêssego */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Seu CSS atual para o avatar-custom */
+.avatar-custom {
+  background-color: hsl(var(--secondary));        /* verde menta */
+  color: hsl(var(--secondary-foreground)) !important;
+  border: 2px solid hsl(var(--primary));          /* borda rosa */
+}
+
+/* Modificações sugeridas para o avatar-custom */
+.avatar-custom {
+  /* Fundo do avatar: Preto ou um tom bem escuro para simular o FinTrack */
+  background-color: hsl(220 20% 15%); /* Um cinza escuro para o fundo do avatar, similar ao FinTrack */
+  /* Cor do texto (fallback): Branco ou um tom claro */
+  color: hsl(0 0% 100%) !important; /* Branco para o texto "FR" */
+
+  /* Remover a borda colorida se não for desejada, ou torná-la sutil */
+  border: none; /* Sem borda */
+  /* Ou, se quiser uma borda sutil, como a do FinTrack: */
+  /* border: 1px solid hsl(220 10% 30%); */ /* Uma borda cinza escura */
+
+  /* Para garantir que o avatar seja redondo */
+  border-radius: 50%; /* Torna o avatar perfeitamente redondo */
+}
+
+
+
