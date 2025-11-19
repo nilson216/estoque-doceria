@@ -1,9 +1,8 @@
-import { PlusIcon } from 'lucide-react'
 import { Navigate } from 'react-router-dom'
 
+import AddMovementButton from '@/components/add-ingredient-button.jsx'
 import DateSelection from '@/components/date-selection.jsx'
 import { Header } from '@/components/header.jsx'
-import { Button } from '@/components/ui/button.jsx'
 
 import { useAuthContext } from '../contexts/auth.jsx'
 
@@ -25,10 +24,7 @@ const HomePage = () => {
         <h2 className='font-bold text-2xl'>Dashboard</h2>
         <div className="flex items-center gap-2">
           <DateSelection />
-          <Button >
-            <PlusIcon />
-            Nova Movimentação
-            </Button>
+          <AddMovementButton />
           {/* Seletor de Data e botao de novo ingrediente */}
         </div>
       </div>
