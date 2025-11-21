@@ -4,37 +4,62 @@ import { useNavigate } from "react-router"
 
 import { DatePickerWithRange } from "./ui/date-picker-with-range"
 
-export const DateSelection = () => {
+// prefix: 'created' or 'expiry' — will store params like createdFrom/createdTo
+export const DateSelection = ({ prefix = 'created', placeholder }) => {
   const navigate = useNavigate()
-  
-  // 1️⃣ Ler parâmetros da URL ou usar valores padrão
-  const searchParams = new URLSearchParams(window.location.search)
-  const initialFrom = searchParams.get("from")
-  const initialTo = searchParams.get("to")
 
-  // Converter strings para Date objects
+  const currentParams = new URLSearchParams(window.location.search)
+  const keyFrom = `${prefix}From`
+  const keyTo = `${prefix}To`
+
+  const initialFrom = currentParams.get(keyFrom)
+  const initialTo = currentParams.get(keyTo)
+
   const [date, setDate] = useState({
-    from: initialFrom ? parseISO(initialFrom) : new Date(), // ou uma data padrão
-    to: initialTo ? parseISO(initialTo) : new Date(), // ou uma data padrão
+    from: initialFrom ? parseISO(initialFrom) : null,
+    to: initialTo ? parseISO(initialTo) : null,
   })
 
-  // 2️⃣ Atualizar a URL quando o estado mudar
   useEffect(() => {
-    if (!date.from || !date.to) return
+    // Build params preserving existing ones
+    const params = new URLSearchParams(window.location.search)
 
-    const formattedFrom = format(date.from, "yyyy-MM-dd")
-    const formattedTo = format(date.to, "yyyy-MM-dd")
-    
-    const currentParams = new URLSearchParams(window.location.search)
-    
-    // Evitar navegar se já estiver igual
-    if (currentParams.get("from") === formattedFrom && 
-        currentParams.get("to") === formattedTo) return
-        
-    navigate(`?from=${formattedFrom}&to=${formattedTo}`, { replace: true })
-  }, [date, navigate])
+    // Guard if date is undefined/null
+    const fromVal = date?.from || null
+    const toVal = date?.to || null
 
-  return <DatePickerWithRange value={date} onChange={setDate} />
+    if (fromVal) {
+      params.set(keyFrom, format(fromVal, 'yyyy-MM-dd'))
+    } else {
+      params.delete(keyFrom)
+    }
+
+    if (toVal) {
+      params.set(keyTo, format(toVal, 'yyyy-MM-dd'))
+    } else {
+      params.delete(keyTo)
+    }
+
+    // Avoid unnecessary navigation
+    if (params.toString() === currentParams.toString()) return
+
+    navigate(`?${params.toString()}`, { replace: true })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date, prefix])
+
+  const handleChange = (v) => {
+    if (!v) return setDate({ from: null, to: null })
+    // v may be an object with { from, to }
+    setDate(v)
+  }
+
+  return (
+    <DatePickerWithRange
+      value={date}
+      onChange={handleChange}
+      placeholder={placeholder}
+    />
+  )
 }
 
 export default DateSelection
