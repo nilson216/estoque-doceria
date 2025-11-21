@@ -1,0 +1,356 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Inventory API",
+    "version": "1.0.0",
+    "description": "API de controle de estoque com usuários, ingredientes e movimentações."
+  },
+  "servers": [
+    { "url": "http://localhost:3000" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "email": { "type": "string" },
+          "password": { "type": "string" },
+          "movements": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Movement" }
+          }
+        }
+      },
+      "CreateUserInput": {
+        "type": "object",
+        "required": ["first_name", "last_name", "email", "password"],
+        "properties": {
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "email": { "type": "string" },
+          "password": { "type": "string" }
+        }
+      },
+      "LoginInput": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string" },
+          "password": { "type": "string" }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string" }
+        }
+      },
+      "Ingredient": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "unit": { "type": "string" },
+          "stockQuantity": { "type": "number" },
+          "expiryDate": { "type": "string", "format": "date", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "movements": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Movement" }
+          }
+        }
+      },
+      "CreateIngredientInput": {
+        "type": "object",
+        "required": ["name", "unit"],
+        "properties": {
+          "name": { "type": "string" },
+          "unit": { "type": "string" },
+          "expiryDate": { "type": "string", "format": "date", "nullable": true }
+        }
+      },
+      "Movement": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "type": {
+            "type": "string",
+            "enum": ["ENTRADA", "SAIDA"]
+          },
+          "quantity": { "type": "number" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "ingredientId": { "type": "string", "format": "uuid" },
+          "userId": { "type": "string", "format": "uuid" },
+          "ingredient": { "$ref": "#/components/schemas/Ingredient" },
+          "user": { "$ref": "#/components/schemas/User" }
+        }
+      },
+      "CreateMovementInput": {
+        "type": "object",
+        "required": ["type", "quantity", "ingredientId", "userId"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["ENTRADA", "SAIDA"]
+          },
+          "quantity": { "type": "number" },
+          "ingredientId": { "type": "string" },
+          "userId": { "type": "string" }
+        }
+      }
+    }
+  },
+  "security": [
+    { "BearerAuth": [] }
+  ],
+  "paths": {
+    "/users": {
+      "get": {
+        "summary": "Listar usuários",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de usuários",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/User" } }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar usuário",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateUserInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Criado",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/User" } }
+            }
+          }
+        }
+      }
+    },
+
+    "/users/{id}": {
+      "get": {
+        "summary": "Buscar usuário",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário encontrado",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/User" } }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar usuário",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateUserInput" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Atualizado" } }
+      },
+      "delete": {
+        "summary": "Deletar usuário",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "204": { "description": "Removido" } }
+      }
+    },
+
+    "/login": {
+      "post": {
+        "summary": "Login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/LoginInput" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token JWT",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/LoginResponse" } }
+            }
+          }
+        }
+      }
+    },
+
+    "/ingredients": {
+      "get": {
+        "summary": "Listar ingredientes",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Ingredientes",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Ingredient" } }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar ingrediente",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateIngredientInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Criado",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Ingredient" } }
+            }
+          }
+        }
+      }
+    },
+
+    "/ingredients/{id}": {
+      "get": {
+        "summary": "Buscar ingrediente",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Encontrado",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Ingredient" } }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar ingrediente",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateIngredientInput" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Atualizado" } }
+      },
+      "delete": {
+        "summary": "Remover ingrediente",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "204": { "description": "Removido" } }
+      }
+    },
+
+    "/movements": {
+      "get": {
+        "summary": "Listar movimentações",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Movimentações",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Movement" } }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar movimentação",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateMovementInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Criado",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Movement" } }
+            }
+          }
+        }
+      }
+    },
+
+    "/movements/{id}": {
+      "get": {
+        "summary": "Buscar movimentação",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Encontrado",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Movement" } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remover movimentação",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "204": { "description": "Removido" } }
+      }
+    }
+  }
+}
