@@ -15,3 +15,4 @@ export * from './movement/create-movement.js';
 export * from './movement/list-movements-by-ingredient.js';
 export * from './movement/get-movement-by-id.js';
 export * from './movement/delete-movement.js';
+export * from './movement/summary-movements.js';
