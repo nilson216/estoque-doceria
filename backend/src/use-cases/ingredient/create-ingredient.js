@@ -4,10 +4,11 @@ export class CreateIngredientUseCase {
         this.idGeneratorAdapter = idGeneratorAdapter;
     }
 
-    async execute(createIngredientParams) {
+    async execute(createIngredientParams, userId = null) {
         const id = this.idGeneratorAdapter.execute();
         const ingredient = { ...createIngredientParams, id };
-        const created = await this.createIngredientRepository.execute(ingredient);
+        // repository will handle atomic creation of initial movement when provided
+        const created = await this.createIngredientRepository.execute(ingredient, userId);
         return created;
     }
 }
