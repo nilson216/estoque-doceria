@@ -1,11 +1,18 @@
 import { Router } from 'express';
 import { auth } from '../middlewares/auth.js';
 import {
-    makeCreateMovementController,
-    makeListMovementsController,
-    makeGetMovementByIdController,
-    makeDeleteMovementController,
+        makeCreateMovementController,
+        makeListMovementsController,
+        makeGetMovementByIdController,
+        makeDeleteMovementController,
 } from '../factories/controllers/movement.js';
+
+/*
+    Router de Movements
+    - Expõe endpoints para listar, criar e gerenciar movimentações do sistema.
+    - Todas as rotas aqui exigem autenticação (`auth`) pois as movimentações estão associadas a usuários.
+    - Controllers são instanciados por factories para manter a construção centralizada.
+*/
 
 export const movementsRouter = Router();
 
