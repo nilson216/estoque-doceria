@@ -1,4 +1,6 @@
 import { PlusIcon } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,12 +21,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { protectedApi } from "@/lib/axios";
 
-const AddIngredientButton = () => {
+const AddIngredientButton = ({ onCreated } = {}) => {
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [unit, setUnit] = useState('')
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const stockQty = Number(formData.get("stockQuantity") || 0)
+    const payload = {
+      name: formData.get("name"),
+      unit: unit || formData.get("unit"),
+      stockQuantity: stockQty,
+      expiryDate: formData.get("expiryDate") || null,
+      initialMovement: stockQty > 0 ? { quantity: stockQty, type: 'ENTRADA' } : undefined,
+    };
+
+    try {
+      setSubmitting(true);
+      // Use protectedApi so Authorization is sent; backend optionalAuth will use userId when present
+      const res = await protectedApi.post("/ingredients", payload);
+      const created = res.data
+      toast.success("Ingrediente criado com sucesso");
+      setOpen(false);
+      form.reset();
+      if (typeof onCreated === "function") onCreated(created);
+      else window.location.reload();
+    } catch (err) {
+      console.error('Create ingredient error', err.response || err);
+      const message = err?.response?.data?.message || err?.response?.data || "Erro ao criar ingrediente";
+      toast.error(typeof message === 'string' ? message : 'Erro ao criar ingrediente');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="primary">
+        <Button variant="default">
           <PlusIcon className="mr-2 h-4 w-4" />
           Novo Ingrediente
         </Button>
@@ -39,7 +79,7 @@ const AddIngredientButton = () => {
         </DialogHeader>
 
         {/* FORMULÁRIO */}
-        <form className="space-y-4 py-2">
+        <form className="space-y-4 py-2" onSubmit={handleSubmit}>
           {/* Nome */}
           <div className="flex flex-col space-y-2">
             <Label htmlFor="name">Nome</Label>
@@ -49,7 +89,7 @@ const AddIngredientButton = () => {
           {/* Unidade */}
           <div className="flex flex-col space-y-2">
             <Label htmlFor="unit">Unidade</Label>
-            <Select name="unit">
+            <Select name="unit" value={unit} onValueChange={setUnit}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a unidade" />
               </SelectTrigger>
@@ -74,7 +114,7 @@ const AddIngredientButton = () => {
               required
             />
           </div>
-
+          
           {/* Validade */}
           <div className="flex flex-col space-y-2">
             <Label htmlFor="expiryDate">Data de Validade</Label>
@@ -82,7 +122,7 @@ const AddIngredientButton = () => {
           </div>
 
           <DialogFooter>
-            <Button type="submit">Salvar</Button>
+            <Button type="submit" disabled={submitting}>{submitting ? 'Salvando...' : 'Salvar'}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
