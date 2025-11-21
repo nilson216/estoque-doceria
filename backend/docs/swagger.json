@@ -23,12 +23,7 @@
           "id": { "type": "string", "format": "uuid" },
           "first_name": { "type": "string" },
           "last_name": { "type": "string" },
-          "email": { "type": "string" },
-          "password": { "type": "string" },
-          "movements": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/Movement" }
-          }
+          "email": { "type": "string" }
         }
       },
       "CreateUserInput": {
@@ -52,7 +47,17 @@
       "LoginResponse": {
         "type": "object",
         "properties": {
-          "token": { "type": "string" }
+          "id": { "type": "string", "format": "uuid" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "email": { "type": "string" },
+          "tokens": {
+            "type": "object",
+            "properties": {
+              "accessToken": { "type": "string" },
+              "refreshToken": { "type": "string" }
+            }
+          }
         }
       },
       "Ingredient": {
@@ -64,11 +69,7 @@
           "stockQuantity": { "type": "number" },
           "expiryDate": { "type": "string", "format": "date", "nullable": true },
           "createdAt": { "type": "string", "format": "date-time" },
-          "updatedAt": { "type": "string", "format": "date-time" },
-          "movements": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/Movement" }
-          }
+          "updatedAt": { "type": "string", "format": "date-time" }
         }
       },
       "CreateIngredientInput": {
@@ -91,22 +92,46 @@
           "quantity": { "type": "number" },
           "createdAt": { "type": "string", "format": "date-time" },
           "ingredientId": { "type": "string", "format": "uuid" },
-          "userId": { "type": "string", "format": "uuid" },
-          "ingredient": { "$ref": "#/components/schemas/Ingredient" },
-          "user": { "$ref": "#/components/schemas/User" }
+          "userId": { "type": "string", "format": "uuid" }
         }
       },
       "CreateMovementInput": {
         "type": "object",
-        "required": ["type", "quantity", "ingredientId", "userId"],
+        "required": ["type", "quantity"],
         "properties": {
           "type": {
             "type": "string",
             "enum": ["ENTRADA", "SAIDA"]
           },
           "quantity": { "type": "number" },
-          "ingredientId": { "type": "string" },
-          "userId": { "type": "string" }
+          "ingredientId": { "type": "string", "format": "uuid", "nullable": true }
+        }
+      },
+      "PaginatedIngredients": {
+        "type": "object",
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/Ingredient" } },
+          "total": { "type": "number" },
+          "page": { "type": "number" },
+          "limit": { "type": "number" }
+        }
+      },
+      "PaginatedMovements": {
+        "type": "object",
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/Movement" } },
+          "total": { "type": "number" },
+          "page": { "type": "number" },
+          "limit": { "type": "number" }
+        }
+      },
+      "PaginatedUsers": {
+        "type": "object",
+        "properties": {
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/User" } },
+          "total": { "type": "number" },
+          "page": { "type": "number" },
+          "limit": { "type": "number" }
         }
       }
     }
@@ -119,10 +144,10 @@
         "security": [{ "BearerAuth": [] }],
         "responses": {
           "200": {
-            "description": "Lista de usuários",
+            "description": "Lista de usuários (paginada)",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/User" } }
+                "schema": { "$ref": "#/components/schemas/PaginatedUsers" }
               }
             }
           }
@@ -240,10 +265,10 @@
         "summary": "Listar ingredientes",
         "responses": {
           "200": {
-            "description": "Ingredientes",
+            "description": "Ingredientes (paginados)",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Ingredient" } }
+                "schema": { "$ref": "#/components/schemas/PaginatedIngredients" }
               }
             }
           }
@@ -314,10 +339,10 @@
         "security": [{ "BearerAuth": [] }],
         "responses": {
           "200": {
-            "description": "Movimentações",
+            "description": "Movimentações (paginadas)",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Movement" } }
+                "schema": { "$ref": "#/components/schemas/PaginatedMovements" }
               }
             }
           }
@@ -379,9 +404,9 @@
         ],
         "responses": {
           "200": {
-            "description": "Movimentações",
+            "description": "Movimentações (paginadas)",
             "content": {
-              "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Movement" } } }
+              "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedMovements" } }
             }
           }
         }
