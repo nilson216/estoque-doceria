@@ -1,0 +1,20 @@
+import { prisma } from '../../../../prisma/prisma.js';
+
+export class PostgresMovementSummaryRepository {
+    // params: { ingredientId, from, to }
+    async execute({ ingredientId, from, to } = {}) {
+        const whereBase = { ingredientId };
+        if (from || to) whereBase.createdAt = {};
+        if (from) whereBase.createdAt.gte = new Date(from);
+        if (to) whereBase.createdAt.lte = new Date(to);
+
+        const [entradasAgg, saidasAgg] = await Promise.all([
+            prisma.movement.aggregate({ where: { ...whereBase, type: 'ENTRADA' }, _sum: { quantity: true } }),
+            prisma.movement.aggregate({ where: { ...whereBase, type: 'SAIDA' }, _sum: { quantity: true } }),
+        ]);
+
+        const entradas = entradasAgg._sum.quantity || 0;
+        const saidas = saidasAgg._sum.quantity || 0;
+        return { entradas, saidas, net: entradas - saidas };
+    }
+}
