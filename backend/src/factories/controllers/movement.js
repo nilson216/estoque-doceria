@@ -6,9 +6,11 @@ import {
     PostgresListMovementsByIngredientRepository,
     PostgresGetMovementByIdRepository,
     PostgresDeleteMovementRepository,
+    PostgresMovementSummaryRepository,
 } from '../../repository/postgres/index.js';
-import { CreateMovementUseCase, ListMovementsUseCase, GetMovementByIdUseCase, DeleteMovementUseCase } from '../../use-cases/index.js';
+import { CreateMovementUseCase, ListMovementsUseCase, GetMovementByIdUseCase, DeleteMovementUseCase, GetMovementSummaryUseCase } from '../../use-cases/index.js';
 import { IdGeneratorAdapter } from '../../adapters/index.js';
+import { GetMovementSummaryController } from '../../controllers/movement/get-summary.js';
 
 export const makeCreateMovementController = () => {
     const getIngredientRepo = new PostgresGetIngredientByIdRepository();
@@ -25,6 +27,12 @@ export const makeListMovementsController = () => {
     const listRepo = new PostgresListMovementsByIngredientRepository();
     const useCase = new ListMovementsUseCase(listRepo);
     return new ListMovementsController(useCase);
+};
+
+export const makeGetMovementSummaryController = () => {
+    const repo = new PostgresMovementSummaryRepository();
+    const useCase = new GetMovementSummaryUseCase(repo);
+    return new GetMovementSummaryController(useCase);
 };
 
 export const makeGetMovementByIdController = () => {
