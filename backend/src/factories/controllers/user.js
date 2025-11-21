@@ -5,6 +5,7 @@ import {
     DeleteUserController,
     LoginUserController,
     RefreshTokenController,
+    ListUsersController,
 } from '../../controllers/index.js';
 import {
     PostgresGetUserByIdRepository,
@@ -13,6 +14,7 @@ import {
     PostgresUpdateUserRepository,
     PostgresDeleteUserRepository,
 } from '../../repository/postgres/index.js';
+import { PostgresListUsersRepository } from '../../repository/postgres/index.js';
 import {
     GetUserByIdUseCase,
     CreateUserUseCase,
@@ -21,6 +23,7 @@ import {
     LoginUserUseCase,
     RefreshTokenUseCase,
 } from '../../use-cases/index.js';
+import { ListUsersUseCase } from '../../use-cases/index.js';
 import {
     IdGeneratorAdapter,
     PasswordComparatorAdapter,
@@ -109,4 +112,11 @@ export const makeRefreshTokenController = () => {
         refreshTokenUseCase,
     );
     return refreshTokenController;
+};
+
+export const makeListUsersController = () => {
+    const listRepo = new PostgresListUsersRepository();
+    const useCase = new ListUsersUseCase(listRepo);
+    const controller = new ListUsersController(useCase);
+    return controller;
 };

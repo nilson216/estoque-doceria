@@ -1,0 +1,20 @@
+import { ok, serverError } from '../helpers/index.js';
+
+export class ListIngredientsController {
+    constructor(listIngredientsUseCase) {
+        this.listIngredientsUseCase = listIngredientsUseCase;
+    }
+
+    async execute(httpRequest = {}) {
+        try {
+            const query = httpRequest.query || {};
+            const page = query.page ? Number(query.page) : 1;
+            const limit = query.limit ? Number(query.limit) : 20;
+            const result = await this.listIngredientsUseCase.execute({ page, limit });
+            return ok({ items: result.items, total: result.total, page, limit });
+        } catch (error) {
+            console.error(error);
+            return serverError();
+        }
+    }
+}

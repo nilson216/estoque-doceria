@@ -6,7 +6,7 @@
     "description": "API de controle de estoque com usuários, ingredientes e movimentações."
   },
   "servers": [
-    { "url": "http://localhost:3000" }
+    { "url": "http://localhost:3000/api" }
   ],
   "components": {
     "securitySchemes": {
@@ -111,9 +111,7 @@
       }
     }
   },
-  "security": [
-    { "BearerAuth": [] }
-  ],
+  
   "paths": {
     "/users": {
       "get": {
@@ -192,7 +190,7 @@
       }
     },
 
-    "/login": {
+    "/users/login": {
       "post": {
         "summary": "Login",
         "requestBody": {
@@ -211,11 +209,35 @@
         }
       }
     },
+    "/users/refresh-token": {
+      "post": {
+        "summary": "Refresh token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["refreshToken"],
+                "properties": { "refreshToken": { "type": "string" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New token",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/LoginResponse" } }
+            }
+          }
+        }
+      }
+    },
 
     "/ingredients": {
       "get": {
         "summary": "Listar ingredientes",
-        "security": [{ "BearerAuth": [] }],
         "responses": {
           "200": {
             "description": "Ingredientes",
@@ -229,7 +251,6 @@
       },
       "post": {
         "summary": "Criar ingrediente",
-        "security": [{ "BearerAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -252,7 +273,6 @@
     "/ingredients/{id}": {
       "get": {
         "summary": "Buscar ingrediente",
-        "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
         ],
@@ -267,7 +287,6 @@
       },
       "put": {
         "summary": "Atualizar ingrediente",
-        "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
         ],
@@ -282,7 +301,6 @@
       },
       "delete": {
         "summary": "Remover ingrediente",
-        "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
         ],
@@ -350,6 +368,51 @@
           { "in": "path", "name": "id", "required": true, "schema": { "type": "string" } }
         ],
         "responses": { "204": { "description": "Removido" } }
+      }
+    }
+    ,
+    "/ingredients/{ingredientId}/movements": {
+      "get": {
+        "summary": "Listar movimentações de um ingrediente",
+        "parameters": [
+          { "in": "path", "name": "ingredientId", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Movimentações",
+            "content": {
+              "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Movement" } } }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar movimentação para ingrediente",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "ingredientId", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["type","quantity"],
+                "properties": {
+                  "type": { "type": "string", "enum": ["ENTRADA","SAIDA"] },
+                  "quantity": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Criado",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Movement" } } }
+          }
+        }
       }
     }
   }

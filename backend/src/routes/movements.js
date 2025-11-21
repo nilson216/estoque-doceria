@@ -1,0 +1,35 @@
+import { Router } from 'express';
+import { auth } from '../middlewares/auth.js';
+import {
+    makeCreateMovementController,
+    makeListMovementsController,
+    makeGetMovementByIdController,
+    makeDeleteMovementController,
+} from '../factories/controllers/movement.js';
+
+export const movementsRouter = Router();
+
+movementsRouter.get('/', auth, (req, res) =>
+    makeListMovementsController()
+        .execute({ query: req.query })
+        .then((r) => res.status(r.statusCode).json(r.body)),
+);
+
+movementsRouter.post('/', auth, (req, res) =>
+    makeCreateMovementController()
+        .execute({ body: req.body, userId: req.userId })
+        .then((r) => res.status(r.statusCode).json(r.body)),
+);
+
+movementsRouter.get('/:id', auth, (req, res) =>
+    makeGetMovementByIdController()
+        .execute({ params: { id: req.params.id } })
+        .then((r) => res.status(r.statusCode).json(r.body)),
+);
+
+movementsRouter.delete('/:id', auth, (req, res) =>
+    makeDeleteMovementController()
+        .execute({ params: { id: req.params.id } })
+        .then((r) => res.status(r.statusCode).json(r.body)),
+);
+

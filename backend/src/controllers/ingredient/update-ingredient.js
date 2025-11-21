@@ -1,0 +1,25 @@
+import { badRequest, ok, serverError } from '../helpers/index.js';
+import { ZodError } from 'zod';
+import { updateIngredientSchema } from '../../schemas/ingredient.js';
+
+export class UpdateIngredientController {
+    constructor(updateIngredientUseCase) {
+        this.updateIngredientUseCase = updateIngredientUseCase;
+    }
+
+    async execute(httpRequest) {
+        try {
+            const { id } = httpRequest.params || {};
+            const params = httpRequest.body;
+            await updateIngredientSchema.parseAsync(params);
+            const updated = await this.updateIngredientUseCase.execute(id, params);
+            return ok(updated);
+        } catch (error) {
+            if (error instanceof ZodError) {
+                return badRequest({ message: error.errors?.[0]?.message || 'Validation error' });
+            }
+            console.error(error);
+            return serverError();
+        }
+    }
+}
