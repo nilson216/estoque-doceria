@@ -1,3 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
-export const prisma = new PrismaClient();
+// Provide the database connection URL to the client via constructor options
+// (Prisma v6 supported passing the datasource url this way).
+export const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+});
