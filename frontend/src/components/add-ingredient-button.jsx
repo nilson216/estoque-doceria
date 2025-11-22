@@ -28,6 +28,8 @@ const AddIngredientButton = ({ onCreated } = {}) => {
   const [submitting, setSubmitting] = useState(false);
 
   const [unit, setUnit] = useState('')
+  const [observacao, setObservacao] = useState('')
+  const [movementObservacao, setMovementObservacao] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,9 +39,10 @@ const AddIngredientButton = ({ onCreated } = {}) => {
     const payload = {
       name: formData.get("name"),
       unit: unit || formData.get("unit"),
+      observacao: observacao || undefined,
       stockQuantity: stockQty,
       expiryDate: formData.get("expiryDate") || null,
-      initialMovement: stockQty > 0 ? { quantity: stockQty, type: 'ENTRADA' } : undefined,
+      initialMovement: stockQty > 0 ? { quantity: stockQty, type: 'ENTRADA', observacao: movementObservacao || undefined } : undefined,
     };
 
     try {
@@ -119,6 +122,16 @@ const AddIngredientButton = ({ onCreated } = {}) => {
           <div className="flex flex-col space-y-2">
             <Label htmlFor="expiryDate">Data de Validade</Label>
             <Input id="expiryDate" name="expiryDate" type="date" />
+          </div>
+
+          <div className="flex flex-col space-y-2">
+            <Label htmlFor="observacao">Observação do Ingrediente (opcional)</Label>
+            <textarea id="observacao" name="observacao" value={observacao} onChange={(e) => setObservacao(e.target.value)} className="w-full border p-2 rounded" rows={2} />
+          </div>
+
+          <div className="flex flex-col space-y-2">
+            <Label htmlFor="movementObservacao">Observação da Entrada Inicial (opcional)</Label>
+            <textarea id="movementObservacao" name="movementObservacao" value={movementObservacao} onChange={(e) => setMovementObservacao(e.target.value)} className="w-full border p-2 rounded" rows={2} />
           </div>
 
           <DialogFooter>

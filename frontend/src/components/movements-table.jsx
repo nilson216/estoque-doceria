@@ -14,6 +14,7 @@ const baseColumns = [
       return <span className={`${color} font-semibold`}>{v === 'ENTRADA' ? 'Entrada' : 'Saída'}</span>
   }},
   { accessorKey: 'quantity', header: 'Quantidade' },
+  { accessorKey: 'observacao', header: 'Observação', cell: ({ getValue }) => getValue() || '-' },
   { accessorKey: 'createdAt', header: 'Data', cell: ({ getValue }) => new Date(getValue()).toLocaleString() },
 ]
 

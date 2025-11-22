@@ -1,6 +1,19 @@
 import { InsufficientStockError, IngredientNotFoundError } from '../../errors/ingredient.js';
 import { prisma } from '../../../prisma/prisma.js';
 
+/*
+    CreateMovementUseCase
+    - Responsabilidade: executar a lógica de domínio para criar uma movimentação e atualizar o estoque
+        do ingrediente relacionado em uma única operação atômica (transação Prisma).
+    - Entradas: { ingredientId, userId, type, quantity }
+    - Comportamento: valida regras de domínio (ingrediente existe, estoque suficiente para SAIDA) e realiza uma
+        transação que (1) cria o registro de movimentação e (2) atualiza o estoque do ingrediente.
+    - Retorna: um objeto { createdMovement, updatedIngredient } para que camadas superiores (controllers/UI)
+        possam reagir às alterações de estoque.
+    - Observações para mantenedores: os repositórios passados ao construtor devem aceitar um cliente
+        Prisma opcional para participar de transações (ver implementações Postgres*Repository).
+*/
+
 export class CreateMovementUseCase {
     constructor(getIngredientRepo, updateIngredientRepo, createMovementRepo, idGeneratorAdapter) {
         this.getIngredientRepo = getIngredientRepo;
@@ -9,7 +22,7 @@ export class CreateMovementUseCase {
         this.idGeneratorAdapter = idGeneratorAdapter;
     }
 
-    async execute({ ingredientId, userId, type, quantity }) {
+    async execute({ ingredientId, userId, type, quantity, observacao }) {
         // obtém ingrediente atual
         const ingredient = await this.getIngredientRepo.execute(ingredientId);
         if (!ingredient) {
@@ -32,6 +45,7 @@ export class CreateMovementUseCase {
                 id: movementId,
                 type,
                 quantity,
+                observacao: observacao ?? null,
                 ingredientId,
                 userId,
             }, tx);
