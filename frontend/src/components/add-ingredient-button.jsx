@@ -1,5 +1,6 @@
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,9 @@ const AddIngredientButton = ({ onCreated } = {}) => {
   const [unit, setUnit] = useState('')
   const [observacao, setObservacao] = useState('')
   const [movementObservacao, setMovementObservacao] = useState('')
+  const [mode, setMode] = useState('new') // 'new' or 'existing'
+  const [existingIngredients, setExistingIngredients] = useState([])
+  const [selectedIngredientId, setSelectedIngredientId] = useState(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,14 +51,29 @@ const AddIngredientButton = ({ onCreated } = {}) => {
 
     try {
       setSubmitting(true);
-      // Use protectedApi so Authorization is sent; backend optionalAuth will use userId when present
-      const res = await protectedApi.post("/ingredients", payload);
-      const created = res.data
-      toast.success("Ingrediente criado com sucesso");
-      setOpen(false);
-      form.reset();
-      if (typeof onCreated === "function") onCreated(created);
-      else window.location.reload();
+      // If user chose to add to an existing ingredient, call the movements endpoint
+      if (mode === 'existing' && selectedIngredientId) {
+        const res = await protectedApi.post(`/ingredients/${selectedIngredientId}/movements`, {
+          type: 'ENTRADA',
+          quantity: stockQty,
+          observacao: movementObservacao || undefined,
+        });
+        const result = res.data
+        toast.success('Quantidade adicionada ao ingrediente existente');
+        setOpen(false);
+        form.reset();
+        if (typeof onCreated === 'function') onCreated(result.updatedIngredient || result);
+        else window.location.reload();
+      } else {
+        // Use protectedApi so Authorization is sent; backend optionalAuth will use userId when present
+        const res = await protectedApi.post("/ingredients", payload);
+        const created = res.data
+        toast.success("Ingrediente criado com sucesso");
+        setOpen(false);
+        form.reset();
+        if (typeof onCreated === "function") onCreated(created);
+        else window.location.reload();
+      }
     } catch (err) {
       console.error('Create ingredient error', err.response || err);
       const message = err?.response?.data?.message || err?.response?.data || "Erro ao criar ingrediente";
@@ -63,6 +82,20 @@ const AddIngredientButton = ({ onCreated } = {}) => {
       setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    // preload existing ingredients for selection when adding to existing
+    const load = async () => {
+      try {
+        const res = await protectedApi.get('/ingredients?limit=100')
+        setExistingIngredients(res.data.items || [])
+      } catch (err) {
+        // ignore silently; user can still create new
+        console.error('Failed to load existing ingredients', err)
+      }
+    }
+    if (open && mode === 'existing') load()
+  }, [open, mode])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -104,6 +137,34 @@ const AddIngredientButton = ({ onCreated } = {}) => {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Mode: new or existing */}
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2">
+              <input type="radio" name="mode" value="new" checked={mode === 'new'} onChange={() => setMode('new')} />
+              <span className="text-sm">Criar novo</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="radio" name="mode" value="existing" checked={mode === 'existing'} onChange={() => setMode('existing')} />
+              <span className="text-sm">Adicionar a existente</span>
+            </label>
+          </div>
+
+          {mode === 'existing' && (
+            <div className="flex flex-col space-y-2">
+              <Label htmlFor="existing">Selecionar ingrediente</Label>
+              <Select name="existing" value={selectedIngredientId || ''} onValueChange={(v) => setSelectedIngredientId(v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Escolha um ingrediente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {existingIngredients.map((ing) => (
+                      <SelectItem key={ing.id} value={ing.id}>{ing.name} — {ing.unit}{ing.expiryDate ? ` — Validade: ${String(ing.expiryDate).split('T')[0]}` : ''} (estoque: {ing.stockQuantity})</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Quantidade */}
           <div className="flex flex-col space-y-2">
