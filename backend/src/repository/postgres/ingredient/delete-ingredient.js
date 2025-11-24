@@ -5,7 +5,9 @@ export class PostgresDeleteIngredientRepository {
         // Delete movements related to the ingredient first, then delete the ingredient
         // Run in a transaction to ensure consistency
         const result = await prisma.$transaction(async (tx) => {
-            await tx.movement.deleteMany({ where: { ingredientId } });
+            // Instead of deleting movements, set their ingredientId to null so
+            // movement history is preserved while removing the ingredient.
+            await tx.movement.updateMany({ where: { ingredientId }, data: { ingredientId: null } });
             const deletedIngredient = await tx.ingredient.delete({ where: { id: ingredientId } });
             return deletedIngredient;
         });
