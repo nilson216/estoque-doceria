@@ -22,7 +22,7 @@ const MovementsTable = ({ ingredientId, refreshSignal } = {}) => {
   const [data, setData] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [limit] = useState(20)
+  const [limit] = useState(10)
   
 
   useEffect(() => {
