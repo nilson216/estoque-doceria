@@ -39,7 +39,7 @@ export class CreateMovementUseCase {
             ? ingredient.stockQuantity + quantity
             : ingredient.stockQuantity - quantity;
 
-        // executa transação: cria movimento e atualiza stock
+        // executa transação: cria movimento e atualiza stock (e soft-delete se zerar)
         const result = await prisma.$transaction(async (tx) => {
             const createdMovement = await this.createMovementRepo.execute({
                 id: movementId,
@@ -50,7 +50,12 @@ export class CreateMovementUseCase {
                 userId,
             }, tx);
 
-            const updatedIngredient = await this.updateIngredientRepo.execute(ingredientId, { stockQuantity: newStock }, tx);
+            const updateParams = { stockQuantity: newStock, __allowStockUpdate: true };
+            if (newStock === 0) {
+                updateParams.deletedAt = new Date();
+            }
+
+            const updatedIngredient = await this.updateIngredientRepo.execute(ingredientId, updateParams, tx);
             return { createdMovement, updatedIngredient };
         });
 
