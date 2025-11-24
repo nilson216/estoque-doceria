@@ -135,7 +135,23 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
         }
 
         window.addEventListener('ingredient:removed', onIngredientRemoved)
-        return () => window.removeEventListener('ingredient:removed', onIngredientRemoved)
+
+        // listen for stock-zero events so we can update a row to reflect zero stock
+        const onStockZero = (e) => {
+            try {
+                const id = e?.detail?.id
+                if (!id) return
+                setData((prev) => prev.map(d => d.id === id ? { ...d, stockQuantity: 0 } : d))
+            } catch {
+                // ignore
+            }
+        }
+        window.addEventListener('ingredient:stockZero', onStockZero)
+
+        return () => {
+            window.removeEventListener('ingredient:removed', onIngredientRemoved)
+            window.removeEventListener('ingredient:stockZero', onStockZero)
+        }
     }, [])
 
     return (
