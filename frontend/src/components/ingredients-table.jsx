@@ -1,6 +1,10 @@
+import { Eye, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter,DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext,PaginationPrevious } from '@/components/ui/pagination'
 import { publicApi } from '@/lib/axios'
 
@@ -20,6 +24,15 @@ const columnsDef = [
     {
         accessorKey: 'stockQuantity',
         header: 'Quantidade em Estoque',
+    },
+    {
+        accessorKey: 'observacao',
+        header: 'Observação',
+        cell: ({ getValue }) => {
+            const val = getValue() || ''
+            const short = val && val.length > 80 ? `${val.slice(0,80)}…` : (val || '-')
+            return <span title={val}>{short}</span>
+        }
     },
     {
         accessorKey: 'expiryDate',
@@ -44,7 +57,28 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
     const [page, setPage] = useState(1)
     const [limit] = useState(10)
     const [loading, setLoading] = useState(false)
+    const [selectedObservacao, setSelectedObservacao] = useState(null)
+    const [dialogOpen, setDialogOpen] = useState(false)
+    const [nameFilter, setNameFilter] = useState('')
+    const [nameQuery, setNameQuery] = useState('')
     const location = useLocation()
+
+    // sync name from URL on load / when location.search changes
+    useEffect(() => {
+        const params = new URLSearchParams(location.search)
+        const n = params.get('name') || ''
+        setNameFilter(n)
+        setNameQuery(n)
+    }, [location.search])
+
+    // debounce input -> query
+    useEffect(() => {
+        const t = setTimeout(() => {
+            setNameQuery(nameFilter)
+            setPage(1)
+        }, 400)
+        return () => clearTimeout(t)
+    }, [nameFilter])
 
     const columns = useMemo(() => {
         // rebuild columns so we can close over setData
@@ -57,6 +91,9 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
                     const ing = row.original
                     return (
                         <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" title="Ver observação" onClick={() => { if (ing.observacao) { setSelectedObservacao(ing.observacao); setDialogOpen(true) } }}>
+                                <Eye className="h-4 w-4" />
+                            </Button>
                             <EditIngredientButton ingredient={ing} onUpdated={(updated) => {
                                 setData((prev) => prev.map(d => d.id === updated.id ? updated : d))
                             }} />
@@ -77,6 +114,13 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
         ]
     }, [])
 
+    // client-side filtered view (instant feedback while server-side query updates)
+    const filteredData = useMemo(() => {
+        if (!nameFilter) return data
+        const q = nameFilter.toString().toLowerCase()
+        return data.filter(d => (d.name || '').toString().toLowerCase().includes(q))
+    }, [data, nameFilter])
+
     useEffect(() => {
         let mounted = true
 
@@ -91,6 +135,7 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
                     const createdTo = params.get('createdTo')
                     const expiryFrom = params.get('expiryFrom')
                     const expiryTo = params.get('expiryTo')
+                    const nameParam = nameQuery || params.get('name')
 
                     // Build query string only with present values
                     const qs = new URLSearchParams()
@@ -100,6 +145,7 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
                     if (createdTo) qs.set('createdTo', createdTo)
                     if (expiryFrom) qs.set('expiryFrom', expiryFrom)
                     if (expiryTo) qs.set('expiryTo', expiryTo)
+                    if (nameParam) qs.set('name', nameParam)
 
                     const res = await publicApi.get(`/ingredients?${qs.toString()}`)
                 const body = res.data
@@ -119,7 +165,7 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
                 return () => {
                         mounted = false
                 }
-    }, [page, limit, refreshSignal, location.search])
+    }, [page, limit, refreshSignal, location.search, nameQuery])
 
     // listen for global ingredient removal events (dispatched after an operation that results in stock 0)
     useEffect(() => {
@@ -179,6 +225,10 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
 
                         return (
                             <div className="flex items-center gap-2">
+                                <div className="relative inline-block">
+                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                                    <Input id="name-filter" placeholder="Nome do ingrediente" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="pl-14 w-full bg-transparent text-base text-gray-700 placeholder-gray-500 focus:outline-none" aria-label="Nome do ingrediente" />
+                                </div>
                                 {badges.map((b, i) => (
                                     <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border">{b.label}</span>
                                 ))}
@@ -188,15 +238,31 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md overflow-hidden border">
-                {loading ? (
-                    <div className="p-6 text-center text-gray-600">Carregando...</div>
-                ) : (
-                    <div className="p-4">
-                        <DataTable columns={columns} data={data} />
+                <div className="bg-white rounded-lg shadow-md overflow-hidden border">
+                    {loading ? (
+                        <div className="p-6 text-center text-gray-600">Carregando...</div>
+                    ) : (
+                        <div className="p-4">
+                            <DataTable columns={columns} data={filteredData} />
+                        </div>
+                    )}
+                </div>
+
+            {/* Observação modal */}
+            <Dialog open={dialogOpen} onOpenChange={(v) => { setDialogOpen(v); if (!v) setSelectedObservacao(null) }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Observação</DialogTitle>
+                        <DialogDescription>Texto completo da observação do ingrediente.</DialogDescription>
+                    </DialogHeader>
+                    <div className="py-2">
+                        <div className="whitespace-pre-wrap text-sm text-gray-800">{selectedObservacao || '-'}</div>
                     </div>
-                )}
-            </div>
+                    <DialogFooter>
+                        <Button onClick={() => setDialogOpen(false)}>Fechar</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
                             {/* Pagination controls (shadcn) */}
                             <div className="mt-4">
