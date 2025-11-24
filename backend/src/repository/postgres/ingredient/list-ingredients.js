@@ -1,13 +1,13 @@
 import { prisma } from '../../../../prisma/prisma.js';
 
 export class PostgresListIngredientsRepository {
-    // params: { page = 1, limit = 20, createdFrom, createdTo, expiryFrom, expiryTo }
-    async execute({ page = 1, limit = 20, createdFrom, createdTo, expiryFrom, expiryTo } = {}) {
-        const take = Math.max(1, Math.min(100, Number(limit || 20)));
+    // params: { page = 1, limit = 10, createdFrom, createdTo, expiryFrom, expiryTo }
+    async execute({ page = 1, limit = 10, createdFrom, createdTo, expiryFrom, expiryTo } = {}) {
+        const take = Math.max(1, Math.min(100, Number(limit || 10)));
         const pageNum = Math.max(1, Number(page || 1));
         const skip = (pageNum - 1) * take;
 
-        const where = {}
+        const where = { deletedAt: null }
 
         if (createdFrom || createdTo) {
             where.createdAt = {}
