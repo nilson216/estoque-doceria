@@ -1,4 +1,4 @@
-import { badRequest, created, serverError } from '../helpers/index.js';
+import { badRequest, created } from '../helpers/index.js';
 import { createIngredientSchema } from '../../schemas/ingredient.js';
 import { ZodError } from 'zod';
 
@@ -22,6 +22,7 @@ export class CreateIngredientController {
     async execute(httpRequest) {
         try {
             const params = httpRequest.body;
+            console.log('CreateIngredientController received body:', JSON.stringify(params));
             const parsed = await createIngredientSchema.parseAsync(params);
         
             const userId = httpRequest.userId || null;
@@ -31,8 +32,12 @@ export class CreateIngredientController {
             if (error instanceof ZodError) {
                 return badRequest({ message: error.errors?.[0]?.message || 'Validation error' });
             }
-            console.error(error);
-            return serverError();
+            console.error('CreateIngredientController unexpected error:', error && (error.stack || error.message || String(error)));
+            // Temporary: include error detail in response to help debugging in dev.
+            return {
+                statusCode: 500,
+                body: { message: 'Internal server error', detail: error && (error.stack || error.message || String(error)) },
+            };
         }
     }
 }
