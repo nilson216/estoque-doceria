@@ -13,18 +13,10 @@ import { prisma } from '../../../../prisma/prisma.js';
 */
 
 export class PostgresCreateIngredientRepository {
-    // createIngredientParams: { id, name, unit, stockQuantity, expiryDate, initialMovement? }
-    // userId: optional user performing the action (used when creating initial movement)
     async execute(createIngredientParams, userId = null) {
         const initialMovement = createIngredientParams.initialMovement || null;
-        // If we have an initial movement and a userId, try to either
-        // - re-use an existing ingredient with the same `name` and `unit` (summing the stock), or
-        // - create a new ingredient + initial movement. Both branches run inside a single transaction.
         if (initialMovement && userId) {
             return await prisma.$transaction(async (tx) => {
-                // try to find an existing ingredient with the same name and unit
-                // normalize expiryDate for comparison: accept either a Date or a YYYY-MM-DD string
-                // and convert to a UTC-midnight Date. Avoid passing an invalid Date object to Prisma.
                 let expiry = null;
                 const rawExpiry = createIngredientParams.expiryDate;
                 if (rawExpiry) {
@@ -33,7 +25,6 @@ export class PostgresCreateIngredientRepository {
                             expiry = new Date(Date.UTC(rawExpiry.getFullYear(), rawExpiry.getMonth(), rawExpiry.getDate()));
                         }
                     } else if (typeof rawExpiry === 'string') {
-                        // prefer strict YYYY-MM-DD format from date inputs
                         const m = rawExpiry.match(/^(\d{4})-(\d{2})-(\d{2})$/);
                         if (m) {
                             expiry = new Date(`${m[1]}-${m[2]}-${m[3]}T00:00:00.000Z`);
