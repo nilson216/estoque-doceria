@@ -9,7 +9,7 @@ export class ListIngredientsController {
         try {
             const query = httpRequest.query || {};
             const page = query.page ? Number(query.page) : 1;
-            const limit = query.limit ? Number(query.limit) : 20;
+            const limit = query.limit ? Number(query.limit) : 10;
             const createdFrom = query.createdFrom || null;
             const createdTo = query.createdTo || null;
             const expiryFrom = query.expiryFrom || null;
