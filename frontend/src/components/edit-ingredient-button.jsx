@@ -93,8 +93,8 @@ const EditIngredientButton = ({ ingredient, onUpdated } = {}) => {
           </div>
 
           <div className="flex flex-col space-y-2">
-            <Label htmlFor={`stock-${ingredient.id}`}>Quantidade</Label>
-            <Input id={`stock-${ingredient.id}`} type="number" value={stockQuantity} onChange={(e) => setStockQuantity(e.target.value)} />
+           <Label htmlFor={`stock-${ingredient.id}`}>Quantidade (gerenciada por movimentações)</Label>
+           <Input id={`stock-${ingredient.id}`} type="number" value={stockQuantity} disabled readOnly />
           </div>
 
           <div className="flex flex-col space-y-2">
