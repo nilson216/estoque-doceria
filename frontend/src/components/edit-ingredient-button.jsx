@@ -25,12 +25,14 @@ const EditIngredientButton = ({ ingredient, onUpdated } = {}) => {
   const [name, setName] = useState(ingredient?.name || '')
   const [unit, setUnit] = useState(ingredient?.unit || '')
   const [stockQuantity, setStockQuantity] = useState(ingredient?.stockQuantity ?? 0)
+  const [observacao, setObservacao] = useState(ingredient?.observacao || '')
   const [expiryDate, setExpiryDate] = useState(ingredient?.expiryDate ? new Date(ingredient.expiryDate).toISOString().slice(0,10) : '')
 
   const resetState = () => {
     setName(ingredient?.name || '')
     setUnit(ingredient?.unit || '')
     setStockQuantity(ingredient?.stockQuantity ?? 0)
+    setObservacao(ingredient?.observacao || '')
     setExpiryDate(ingredient?.expiryDate ? new Date(ingredient.expiryDate).toISOString().slice(0,10) : '')
   }
 
@@ -41,8 +43,8 @@ const EditIngredientButton = ({ ingredient, onUpdated } = {}) => {
       const payload = {
         name,
         unit,
-        stockQuantity: Number(stockQuantity || 0),
         expiryDate: expiryDate || null,
+        observacao: observacao || null,
       }
       const res = await publicApi.put(`/ingredients/${ingredient.id}`, payload)
       toast.success('Ingrediente atualizado')
@@ -100,6 +102,11 @@ const EditIngredientButton = ({ ingredient, onUpdated } = {}) => {
           <div className="flex flex-col space-y-2">
             <Label htmlFor={`expiry-${ingredient.id}`}>Data de Validade</Label>
             <Input id={`expiry-${ingredient.id}`} type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
+          </div>
+
+          <div className="flex flex-col space-y-2">
+            <Label htmlFor={`observacao-${ingredient.id}`}>Observação do Ingrediente (opcional)</Label>
+            <textarea id={`observacao-${ingredient.id}`} value={observacao} onChange={(e) => setObservacao(e.target.value)} className="w-full border p-2 rounded" rows={2} />
           </div>
 
           <DialogFooter>
