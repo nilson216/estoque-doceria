@@ -1,13 +1,24 @@
 import { prisma } from '../../../../prisma/prisma.js';
 
 export class PostgresListIngredientsRepository {
-    // params: { page = 1, limit = 10, createdFrom, createdTo, expiryFrom, expiryTo }
-    async execute({ page = 1, limit = 10, createdFrom, createdTo, expiryFrom, expiryTo } = {}) {
+    // params: { page = 1, limit = 10, createdFrom, createdTo, expiryFrom, expiryTo, userId }
+    async execute({ page = 1, limit = 10, createdFrom, createdTo, expiryFrom, expiryTo, userId = null } = {}) {
         const take = Math.max(1, Math.min(100, Number(limit || 10)));
         const pageNum = Math.max(1, Number(page || 1));
         const skip = (pageNum - 1) * take;
 
         const where = { deletedAt: null }
+
+        // If no userId provided, deny access (strict mode)
+        if (typeof userId === 'undefined' || userId === null) {
+            return { items: [], total: 0 };
+        }
+
+        // When authenticated, return both the user's ingredients and global ones (userId == null).
+        where.OR = [
+            { userId: userId },
+            { userId: null },
+        ]
 
         if (createdFrom || createdTo) {
             where.createdAt = {}
