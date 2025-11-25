@@ -5,8 +5,7 @@ export const createIngredientSchema = z.object({
   unit: z.string().trim().min(1),
   observacao: z.string().trim().max(1000).optional(),
   stockQuantity: z.number().nonnegative().optional(),
-  expiryDate: z.coerce.date().optional(), // aceita ISO string e converte para Date
-  // optional initial movement that can be created together with ingredient
+  expiryDate: z.coerce.date().optional(),
   initialMovement: z.object({
     quantity: z.number().nonnegative(),
     type: z.enum(['ENTRADA','SAIDA']).optional(),
