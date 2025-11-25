@@ -3,7 +3,7 @@ export class GetIngredientByIdUseCase {
         this.getIngredientByIdRepository = getIngredientByIdRepository;
     }
 
-    async execute(ingredientId) {
-        return await this.getIngredientByIdRepository.execute(ingredientId);
+    async execute(ingredientId, userId = null) {
+        return await this.getIngredientByIdRepository.execute(ingredientId, userId);
     }
 }
