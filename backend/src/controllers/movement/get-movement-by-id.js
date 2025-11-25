@@ -8,7 +8,8 @@ export class GetMovementByIdController {
     async execute(httpRequest = {}) {
         try {
             const id = httpRequest.params?.id;
-            const movement = await this.getMovementByIdUseCase.execute(id);
+            const userId = httpRequest.userId || null;
+            const movement = await this.getMovementByIdUseCase.execute(id, userId);
             if (!movement) return notFound();
             return ok(movement);
         } catch (error) {
