@@ -15,7 +15,8 @@ export class ListIngredientsController {
             const expiryFrom = query.expiryFrom || null;
             const expiryTo = query.expiryTo || null;
 
-            const result = await this.listIngredientsUseCase.execute({ page, limit, createdFrom, createdTo, expiryFrom, expiryTo });
+            const userId = httpRequest.userId || null;
+            const result = await this.listIngredientsUseCase.execute({ page, limit, createdFrom, createdTo, expiryFrom, expiryTo, userId });
             return ok({ items: result.items, total: result.total, page, limit });
         } catch (error) {
             console.error(error);
