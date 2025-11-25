@@ -18,7 +18,7 @@ export const movementsRouter = Router();
 
 movementsRouter.get('/', auth, (req, res) =>
     makeListMovementsController()
-        .execute({ query: req.query })
+        .execute({ query: req.query, userId: req.userId })
         .then((r) => res.status(r.statusCode).json(r.body)),
 );
 
@@ -30,13 +30,13 @@ movementsRouter.post('/', auth, (req, res) =>
 
 movementsRouter.get('/:id', auth, (req, res) =>
     makeGetMovementByIdController()
-        .execute({ params: { id: req.params.id } })
+        .execute({ params: { id: req.params.id }, userId: req.userId })
         .then((r) => res.status(r.statusCode).json(r.body)),
 );
 
 movementsRouter.delete('/:id', auth, (req, res) =>
     makeDeleteMovementController()
-        .execute({ params: { id: req.params.id } })
+        .execute({ params: { id: req.params.id }, userId: req.userId })
         .then((r) => res.status(r.statusCode).json(r.body)),
 );
 
