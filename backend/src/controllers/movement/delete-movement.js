@@ -8,7 +8,8 @@ export class DeleteMovementController {
     async execute(httpRequest = {}) {
         try {
             const id = httpRequest.params?.id;
-            const deleted = await this.deleteMovementUseCase.execute(id);
+            const userId = httpRequest.userId || null;
+            const deleted = await this.deleteMovementUseCase.execute(id, userId);
             if (!deleted) return notFound();
             return ok(deleted);
         } catch (error) {
