@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter,DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext,PaginationPrevious } from '@/components/ui/pagination'
-import { publicApi } from '@/lib/axios'
+import { protectedApi } from '@/lib/axios'
 
 import DeleteIngredientButton from './delete-ingredient-button'
 import EditIngredientButton from './edit-ingredient-button'
@@ -147,7 +147,7 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
                     if (expiryTo) qs.set('expiryTo', expiryTo)
                     if (nameParam) qs.set('name', nameParam)
 
-                    const res = await publicApi.get(`/ingredients?${qs.toString()}`)
+                    const res = await protectedApi.get(`/ingredients?${qs.toString()}`)
                 const body = res.data
                 if (!mounted) return
                 setData(body.items || [])
