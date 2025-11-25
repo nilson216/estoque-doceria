@@ -22,8 +22,9 @@ app.use(cors());
 app.use(express.json());
 
 // Rotas da API
+// Redirect the root URL to the Swagger UI so the service root is useful.
 app.get('/', (req, res) => {
-    res.json({ message: "API funcionando! 🚀" });
+    return res.redirect('/api/docs');
 });
 
 app.use('/api/users', usersRouter);
