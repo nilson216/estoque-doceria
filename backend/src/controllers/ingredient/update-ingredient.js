@@ -12,7 +12,8 @@ export class UpdateIngredientController {
             const { id } = httpRequest.params || {};
             const params = httpRequest.body;
             const parsed = await updateIngredientSchema.parseAsync(params);
-            const updated = await this.updateIngredientUseCase.execute(id, parsed);
+            const userId = httpRequest.userId || null;
+            const updated = await this.updateIngredientUseCase.execute(id, parsed, userId);
             return ok(updated);
         } catch (error) {
             if (error instanceof ZodError) {
