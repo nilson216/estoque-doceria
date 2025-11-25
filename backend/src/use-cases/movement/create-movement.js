@@ -23,8 +23,8 @@ export class CreateMovementUseCase {
     }
 
     async execute({ ingredientId, userId, type, quantity, observacao }) {
-        // obtém ingrediente atual
-        const ingredient = await this.getIngredientRepo.execute(ingredientId);
+        // obtém ingrediente atual — validar se o requisitante tem acesso (owner or global)
+        const ingredient = await this.getIngredientRepo.execute(ingredientId, userId ?? null);
         if (!ingredient) {
             throw new IngredientNotFoundError(ingredientId);
         }
@@ -55,7 +55,8 @@ export class CreateMovementUseCase {
                 updateParams.deletedAt = new Date();
             }
 
-            const updatedIngredient = await this.updateIngredientRepo.execute(ingredientId, updateParams, tx);
+            // pass the ingredient owner id so repository ownership check passes
+            const updatedIngredient = await this.updateIngredientRepo.execute(ingredientId, updateParams, ingredient.userId ?? null, tx);
             return { createdMovement, updatedIngredient };
         });
 
