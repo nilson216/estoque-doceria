@@ -15,6 +15,9 @@ import { prisma } from '../../../../prisma/prisma.js';
 export class PostgresCreateIngredientRepository {
     async execute(createIngredientParams, userId = null) {
         const initialMovement = createIngredientParams.initialMovement || null;
+        if (!userId) {
+            throw new Error('userId is required to create an ingredient');
+        }
         if (initialMovement && userId) {
             return await prisma.$transaction(async (tx) => {
                 let expiry = null;
@@ -36,11 +39,13 @@ export class PostgresCreateIngredientRepository {
                         }
                     }
                 }
+                const owner = userId ?? null
                 const existing = await tx.ingredient.findFirst({
                     where: {
                         name: createIngredientParams.name,
                         unit: createIngredientParams.unit,
                         expiryDate: expiry,
+                        userId: owner,
                     },
                 });
 
@@ -79,6 +84,7 @@ export class PostgresCreateIngredientRepository {
                         stockQuantity: createIngredientParams.stockQuantity ?? 0,
                         observacao: createIngredientParams.observacao ?? null,
                         expiryDate: expiry,
+                        userId: owner,
                     },
                 });
 
@@ -97,7 +103,7 @@ export class PostgresCreateIngredientRepository {
             });
         }
 
-        // Fallback: simple create
+        // Fallback: simple create (assign owner when provided)
         return await prisma.ingredient.create({
             data: {
                 id: createIngredientParams.id,
@@ -106,6 +112,7 @@ export class PostgresCreateIngredientRepository {
                 stockQuantity: createIngredientParams.stockQuantity ?? 0,
                 observacao: createIngredientParams.observacao ?? null,
                 expiryDate: createIngredientParams.expiryDate ?? null,
+                userId: userId ?? null,
             },
         });
     }
