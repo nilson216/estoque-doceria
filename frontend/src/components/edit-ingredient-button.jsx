@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { publicApi } from '@/lib/axios'
+import { protectedApi } from '@/lib/axios'
 
 const EditIngredientButton = ({ ingredient, onUpdated } = {}) => {
   const [open, setOpen] = useState(false)
@@ -46,7 +46,7 @@ const EditIngredientButton = ({ ingredient, onUpdated } = {}) => {
         expiryDate: expiryDate || null,
         observacao: observacao || null,
       }
-      const res = await publicApi.put(`/ingredients/${ingredient.id}`, payload)
+      const res = await protectedApi.put(`/ingredients/${ingredient.id}`, payload)
       toast.success('Ingrediente atualizado')
       setOpen(false)
       if (typeof onUpdated === 'function') onUpdated(res.data)
