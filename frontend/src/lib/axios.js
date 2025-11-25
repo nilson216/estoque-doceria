@@ -7,11 +7,11 @@ import {
 
 // === INSTÂNCIAS ===
 export const protectedApi = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: 'http://localhost:8080/api',
 })
 
 export const publicApi = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: 'http://localhost:8080/api',
 })
 
 
