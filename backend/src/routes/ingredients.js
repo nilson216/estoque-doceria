@@ -18,16 +18,10 @@ import { makeGetMovementSummaryController } from '../factories/controllers/movem
 export const ingredientsRouter = Router();
 
 ingredientsRouter.post('/', auth, (req, res) => makeCreateIngredientController().execute({ body: req.body, userId: req.userId }).then(r => res.status(r.statusCode).json(r.body)));
-// Temporary debug route: create ingredient without auth by using a known test user id.
-// NOTE: This route is for local debugging only and should be removed before production.
-ingredientsRouter.post('/_noauth', (req, res) => {
-    const testUserId = 'f8fdf500-bf26-494b-846e-24763569de42';
-    makeCreateIngredientController().execute({ body: req.body, userId: testUserId }).then((r) => res.status(r.statusCode).json(r.body));
-});
-ingredientsRouter.get('/', (req, res) => makeListIngredientsController().execute({ query: req.query }).then(r => res.status(r.statusCode).json(r.body)));
-ingredientsRouter.get('/:id', (req, res) => makeGetIngredientByIdController().execute({ params: req.params }).then(r => res.status(r.statusCode).json(r.body)));
-ingredientsRouter.put('/:id', (req, res) => makeUpdateIngredientController().execute({ params: req.params, body: req.body }).then(r => res.status(r.statusCode).json(r.body)));
-ingredientsRouter.delete('/:id', (req, res) => makeDeleteIngredientController().execute({ params: req.params }).then(r => res.status(r.statusCode).json(r.body)));
+ingredientsRouter.get('/', auth, (req, res) => makeListIngredientsController().execute({ query: req.query, userId: req.userId }).then(r => res.status(r.statusCode).json(r.body)));
+ingredientsRouter.get('/:id', auth, (req, res) => makeGetIngredientByIdController().execute({ params: req.params, userId: req.userId }).then(r => res.status(r.statusCode).json(r.body)));
+ingredientsRouter.put('/:id', auth, (req, res) => makeUpdateIngredientController().execute({ params: req.params, body: req.body, userId: req.userId }).then(r => res.status(r.statusCode).json(r.body)));
+ingredientsRouter.delete('/:id', auth, (req, res) => makeDeleteIngredientController().execute({ params: req.params, userId: req.userId }).then(r => res.status(r.statusCode).json(r.body)));
 
 
 ingredientsRouter.post('/:ingredientId/movements', auth, (req, res) => {
