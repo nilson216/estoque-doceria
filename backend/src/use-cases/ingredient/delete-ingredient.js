@@ -3,7 +3,7 @@ export class DeleteIngredientUseCase {
         this.deleteIngredientRepository = deleteIngredientRepository;
     }
 
-    async execute(ingredientId) {
-        return await this.deleteIngredientRepository.execute(ingredientId);
+    async execute(ingredientId, userId = null) {
+        return await this.deleteIngredientRepository.execute(ingredientId, userId);
     }
 }
