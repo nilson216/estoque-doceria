@@ -28,5 +28,5 @@ ingredientsRouter.post('/:ingredientId/movements', auth, (req, res) => {
     // auth middleware sets `req.userId`
     makeCreateMovementController().execute({ params: req.params, body: req.body, userId: req.userId }).then(r => res.status(r.statusCode).json(r.body));
 });
-ingredientsRouter.get('/:ingredientId/movements', (req, res) => makeListMovementsController().execute({ params: req.params, query: req.query }).then(r => res.status(r.statusCode).json(r.body)));
-ingredientsRouter.get('/:ingredientId/movements/summary', (req, res) => makeGetMovementSummaryController().execute({ params: req.params, query: req.query }).then(r => res.status(r.statusCode).json(r.body)));
+ingredientsRouter.get('/:ingredientId/movements', auth, (req, res) => makeListMovementsController().execute({ params: req.params, query: req.query, userId: req.userId }).then(r => res.status(r.statusCode).json(r.body)));
+ingredientsRouter.get('/:ingredientId/movements/summary', auth, (req, res) => makeGetMovementSummaryController().execute({ params: req.params, query: req.query, userId: req.userId }).then(r => res.status(r.statusCode).json(r.body)));

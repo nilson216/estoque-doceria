@@ -12,7 +12,8 @@ export class GetMovementSummaryController {
             const from = params.from || params.fromDate || null;
             const to = params.to || params.toDate || null;
 
-            const result = await this.getMovementSummaryUseCase.execute({ ingredientId, from, to });
+            const userId = httpRequest.userId || null;
+            const result = await this.getMovementSummaryUseCase.execute({ ingredientId, from, to }, userId);
             return ok(result);
         } catch (error) {
             console.error(error);

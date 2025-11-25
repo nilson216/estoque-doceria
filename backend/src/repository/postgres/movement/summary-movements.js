@@ -2,8 +2,11 @@ import { prisma } from '../../../../prisma/prisma.js';
 
 export class PostgresMovementSummaryRepository {
     // params: { ingredientId, from, to }
-    async execute({ ingredientId, from, to } = {}) {
-        const whereBase = { ingredientId };
+    async execute({ ingredientId, from, to } = {}, userId = null) {
+        // require user for summary access
+        if (!userId) return { entradas: 0, saidas: 0, net: 0 };
+
+        const whereBase = { ingredientId, ingredient: { userId } };
         if (from || to) whereBase.createdAt = {};
         if (from) whereBase.createdAt.gte = new Date(from);
         if (to) whereBase.createdAt.lte = new Date(to);
