@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Slider } from '@/components/ui/slider'
-import { protectedApi, publicApi } from '@/lib/axios'
+import { protectedApi } from '@/lib/axios'
 
 const DeleteIngredientButton = ({ ingredientId, onDeleted, onUpdated } = {}) => {
   const [open, setOpen] = useState(false)
@@ -20,10 +20,10 @@ const DeleteIngredientButton = ({ ingredientId, onDeleted, onUpdated } = {}) => 
 
   useEffect(() => {
     if (!open) return
-    const load = async () => {
+        const load = async () => {
       try {
         setLoadingIngredient(true)
-        const { data } = await publicApi.get(`/ingredients/${ingredientId}`)
+        const { data } = await protectedApi.get(`/ingredients/${ingredientId}`)
         setIngredient(data)
         const current = Number(data.stockQuantity || 0)
         // default amount to 1 when stock > 0, otherwise 0
