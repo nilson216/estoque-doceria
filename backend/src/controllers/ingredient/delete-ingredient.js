@@ -8,7 +8,8 @@ export class DeleteIngredientController {
     async execute(httpRequest) {
         try {
             const { id } = httpRequest.params || {};
-            const deleted = await this.deleteIngredientUseCase.execute(id);
+            const userId = httpRequest.userId || null;
+            const deleted = await this.deleteIngredientUseCase.execute(id, userId);
             return ok(deleted);
         } catch (error) {
             console.error(error);
