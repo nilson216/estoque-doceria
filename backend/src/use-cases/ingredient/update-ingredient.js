@@ -3,7 +3,7 @@ export class UpdateIngredientUseCase {
         this.updateIngredientRepository = updateIngredientRepository;
     }
 
-    async execute(ingredientId, updateParams) {
-        return await this.updateIngredientRepository.execute(ingredientId, updateParams);
+    async execute(ingredientId, updateParams, userId = null) {
+        return await this.updateIngredientRepository.execute(ingredientId, updateParams, userId);
     }
 }
