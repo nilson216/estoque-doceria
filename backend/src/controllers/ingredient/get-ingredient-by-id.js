@@ -8,7 +8,8 @@ export class GetIngredientByIdController {
     async execute(httpRequest) {
         try {
             const { id } = httpRequest.params || {};
-            const ingredient = await this.getIngredientByIdUseCase.execute(id);
+            const userId = httpRequest.userId || null;
+            const ingredient = await this.getIngredientByIdUseCase.execute(id, userId);
             if (!ingredient) return notFound({ message: 'Ingredient not found' });
             return ok(ingredient);
         } catch (error) {
