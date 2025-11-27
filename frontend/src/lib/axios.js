@@ -46,30 +46,29 @@ protectedApi.interceptors.response.use(
     }
 
 
-    // Se NÃO for erro 401 → rejeita normal
-    if (error.response.status !== 401 && !request._retry && !request.url.includes('/users/refresh-token')) {
+    // If status is 401, try to refresh tokens (unless we're already retrying or calling the refresh endpoint)
+    if (error.response.status === 401 && !request._retry && !request.url.includes('/users/refresh-token')) {
       request._retry = true
-       try {
-      // Requisita novos tokens
-      const response = await publicApi.post('/users/refresh-token', {
-        refreshToken,
-      })
+      try {
+        const response = await publicApi.post('/users/refresh-token', {
+          refreshToken,
+        })
 
-      const newAccessToken = response.data.accessToken
-      const newRefreshToken = response.data.refreshToken
+        const newAccessToken = response.data.accessToken
+        const newRefreshToken = response.data.refreshToken
 
-      // Salva novos tokens
-      localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, newAccessToken)
-      localStorage.setItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY, newRefreshToken)
+        // Save new tokens
+        localStorage.setItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY, newAccessToken)
+        localStorage.setItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY, newRefreshToken)
 
-      // Reenvia requisição original com token atualizado
-      request.headers.Authorization = `Bearer ${newAccessToken}`
-      return protectedApi(request)
-
-    } catch (refreshError) {
-      localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY)
-      localStorage.removeItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY)
-      console.error('Erro ao atualizar token:', refreshError)
+        // Replay original request with updated token
+        request.headers = request.headers || {}
+        request.headers.Authorization = `Bearer ${newAccessToken}`
+        return protectedApi(request)
+      } catch (refreshError) {
+        localStorage.removeItem(LOCAL_STORAGE_ACCESS_TOKEN_KEY)
+        localStorage.removeItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY)
+        console.error('Erro ao atualizar token:', refreshError)
       }
     }
     return Promise.reject(error)
