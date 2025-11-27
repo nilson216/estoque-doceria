@@ -14,7 +14,7 @@ const baseColumns = [
       return <span className={`${color} font-semibold`}>{v === 'ENTRADA' ? 'Entrada' : 'Saída'}</span>
   }},
   { accessorKey: 'quantity', header: 'Quantidade' },
-  { accessorKey: 'observacao', header: 'Observação', cell: ({ getValue }) => getValue() || '-' },
+  { accessorKey: 'observacao', header: 'Observação', meta: { className: 'hidden sm:table-cell' }, cell: ({ getValue }) => getValue() || '-' },
   { accessorKey: 'createdAt', header: 'Data', cell: ({ getValue }) => new Date(getValue()).toLocaleString() },
 ]
 
@@ -122,7 +122,7 @@ const MovementsTable = ({ ingredientId, refreshSignal } = {}) => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
         <div>
           <h3 className="text-xl font-semibold text-gray-800">Movimentações</h3>
           <div className="mt-1 text-sm text-gray-500">Total: <span className="font-medium text-gray-700">{total}</span></div>
@@ -130,7 +130,7 @@ const MovementsTable = ({ ingredientId, refreshSignal } = {}) => {
       </div>
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden border">
-        <div className="p-4">
+        <div className="p-4 overflow-x-auto">
           <DataTable columns={columns} data={data} />
         </div>
       </div>
