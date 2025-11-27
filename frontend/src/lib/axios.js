@@ -5,13 +5,15 @@ import {
   LOCAL_STORAGE_REFRESH_TOKEN_KEY,
 } from '@/constants/local-storage'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 // === INSTÂNCIAS ===
 export const protectedApi = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: `${API_BASE_URL}/api`,
 })
 
 export const publicApi = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: `${API_BASE_URL}/api`,
 })
 
 
