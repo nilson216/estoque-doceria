@@ -22,11 +22,11 @@ const HomePage = () => {
   return (
     <>
       <Header />
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         {/* Parte do Topo */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0">
         <h2 className='font-bold text-2xl'>Dashboard</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <DateSelection prefix="created" placeholder="Registro: selecione intervalo" />
           <DateSelection prefix="expiry" placeholder="Validade: selecione intervalo" />
           <AddIngredientButton onCreated={() => setCreatedSignal(s => s + 1)} />
