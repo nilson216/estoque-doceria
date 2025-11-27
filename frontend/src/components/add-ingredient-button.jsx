@@ -1,6 +1,7 @@
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { useEffect } from "react";
+import { useLocation } from 'react-router-dom'
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -83,11 +84,34 @@ const AddIngredientButton = ({ onCreated } = {}) => {
     }
   };
 
+  const location = useLocation()
+
   useEffect(() => {
     // preload existing ingredients for selection when adding to existing
     const load = async () => {
       try {
-        const res = await protectedApi.get('/ingredients?limit=100')
+        // Mirror the same query params used by the ingredients table so we only show
+        // ingredients that are currently listed (respecting filters).
+        const params = new URLSearchParams(location.search)
+        const qs = new URLSearchParams()
+        // copy pagination if present
+        if (params.get('page')) qs.set('page', params.get('page'))
+        if (params.get('limit')) qs.set('limit', params.get('limit'))
+        // copy filters
+        const createdFrom = params.get('createdFrom')
+        const createdTo = params.get('createdTo')
+        const expiryFrom = params.get('expiryFrom')
+        const expiryTo = params.get('expiryTo')
+        const nameParam = params.get('name')
+        if (createdFrom) qs.set('createdFrom', createdFrom)
+        if (createdTo) qs.set('createdTo', createdTo)
+        if (expiryFrom) qs.set('expiryFrom', expiryFrom)
+        if (expiryTo) qs.set('expiryTo', expiryTo)
+        if (nameParam) qs.set('name', nameParam)
+        
+        if (!qs.get('limit')) qs.set('limit', '100')
+
+        const res = await protectedApi.get(`/ingredients?${qs.toString()}`)
         setExistingIngredients(res.data.items || [])
       } catch (err) {
         // ignore silently; user can still create new
@@ -95,7 +119,7 @@ const AddIngredientButton = ({ onCreated } = {}) => {
       }
     }
     if (open && mode === 'existing') load()
-  }, [open, mode])
+  }, [open, mode, location.search])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
