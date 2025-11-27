@@ -30,7 +30,7 @@ export const Header = () => {
            <Button variant="outline" className="space-x-2">
             <Avatar className="avatar-custom h-8 w-8 rounded-full overflow-hidden">
                 <AvatarImage
-                src="../../public/avatarUrl.png"
+                  src={user?.avatarUrl}
                 className="rounded-full object-cover"
                 />
                 <AvatarFallback className="rounded-full">{user.firstName.charAt(0)}{user.lastName.charAt(0)}</AvatarFallback>
