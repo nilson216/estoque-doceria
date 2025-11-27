@@ -20,6 +20,7 @@ const columnsDef = [
     {
         accessorKey: 'unit',
         header: 'Unidade',
+        meta: { className: 'hidden sm:table-cell' },
     },
     {
         accessorKey: 'stockQuantity',
@@ -37,6 +38,7 @@ const columnsDef = [
     {
         accessorKey: 'expiryDate',
         header: 'Data de Validade',
+        meta: { className: 'hidden md:table-cell' },
         cell: ({ getValue }) => {
             const val = getValue()
             return val ? new Date(val).toLocaleDateString() : '-'
@@ -202,12 +204,12 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
 
     return (
         <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
                 <div>
                     <h3 className="text-xl font-semibold text-gray-800">Ingredientes</h3>
                     <div className="mt-1 text-sm text-gray-500">Total: <span className="font-medium text-gray-700">{total}</span></div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                     {/* Filter badges from URL */}
                     {(() => {
                         const params = new URLSearchParams(location.search)
@@ -225,9 +227,9 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
 
                         return (
                             <div className="flex items-center gap-2">
-                                <div className="relative inline-block">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                                    <Input id="name-filter" placeholder="Nome do ingrediente" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="pl-14 w-full bg-transparent text-base text-gray-700 placeholder-gray-500 focus:outline-none" aria-label="Nome do ingrediente" />
+                                    <div className="relative inline-block max-w-xs w-full sm:w-64">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+                                    <Input id="name-filter" placeholder="Nome do ingrediente" value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} className="pl-10 sm:pl-14 w-full bg-transparent text-base text-gray-700 placeholder-gray-500 focus:outline-none" aria-label="Nome do ingrediente" />
                                 </div>
                                 {badges.map((b, i) => (
                                     <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border">{b.label}</span>
@@ -242,7 +244,7 @@ const IngredientsTable = ({ refreshSignal } = {}) => {
                     {loading ? (
                         <div className="p-6 text-center text-gray-600">Carregando...</div>
                     ) : (
-                        <div className="p-4">
+                        <div className="p-4 overflow-x-auto">
                             <DataTable columns={columns} data={filteredData} />
                         </div>
                     )}
