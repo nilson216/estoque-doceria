@@ -36,7 +36,6 @@ export class CreateMovementController {
                 // coerce numeric strings to numbers for validation
                 params.quantity = Number(params.quantity);
             }
-            console.log('CreateMovementController params:', JSON.stringify(params));
             // inject userId coming from middleware
             params.userId = userId;
             const parsed = await createMovementSchema.parseAsync(params);

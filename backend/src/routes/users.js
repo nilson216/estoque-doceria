@@ -15,8 +15,6 @@ export const usersRouter = Router();
 usersRouter.get('/me', auth, async (request, response) => {
     const getUserByIdController = makeGetUserByIdController();
 
-    console.log('Usuário autenticado: ', request.userId);
-
     const { statusCode, body } = await getUserByIdController.execute({
         ...request,
         params: {

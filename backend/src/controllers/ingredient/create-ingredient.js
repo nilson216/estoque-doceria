@@ -22,7 +22,6 @@ export class CreateIngredientController {
     async execute(httpRequest) {
         try {
             const params = httpRequest.body;
-            console.log('CreateIngredientController received body:', JSON.stringify(params));
             const parsed = await createIngredientSchema.parseAsync(params);
         
             const userId = httpRequest.userId || null;

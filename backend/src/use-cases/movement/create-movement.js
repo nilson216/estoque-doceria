@@ -59,9 +59,6 @@ export class CreateMovementUseCase {
             const updatedIngredient = await this.updateIngredientRepo.execute(ingredientId, updateParams, ingredient.userId ?? null, tx);
             return { createdMovement, updatedIngredient };
         });
-
-        // retorna movimento (pode retornar também ingredient atualizado)
-        console.log('CreateMovementUseCase result:', JSON.stringify(result));
         return result;
     }
 }
