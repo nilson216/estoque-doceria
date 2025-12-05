@@ -346,20 +346,44 @@ Para ver a documentação completa da API, acesse: `http://localhost:3000/api/do
    - `JWT_REFRESH_TOKEN_SECRET`
    - `PORT` (Render configura automaticamente)
 
-### Frontend (Render Static Site)
+### Frontend (Render Static Site) - ✅ DETECÇÃO AUTOMÁTICA DE API
+
+⚠️ **IMPORTANTE: A URL da API agora é detectada AUTOMATICAMENTE em runtime!**
+
+Isso significa que o frontend **não depende mais do `.env`** durante o build. Funciona assim:
+
+- **Em localhost**: Conecta a `http://localhost:3000`
+- **Em produção (Render)**: Substitui `"frontend"` por `"backend"` no domínio
+  - Ex: `https://estoque-doceria-frontend.onrender.com` → `https://estoque-doceria-backend.onrender.com`
+
+#### Configurar no Render (Frontend)
 
 1. Crie um novo Static Site no Render
 2. Conecte seu repositório GitHub
 3. Configure:
    - **Root Directory**: `frontend`
-   - **Build Command**: `npm install && npm run build`
+   - **Build Command**: `bash render-build.sh` (limpa cache e builda limpo)
    - **Publish Directory**: `dist`
-4. Adicione a variável de ambiente:
-   - `VITE_API_BASE_URL` (URL do seu backend deployado)
+4. **NÃO é necessário adicionar `VITE_API_BASE_URL`** (é automático!)
+   - ✅ Se quiser forçar uma URL customizada, pode adicionar como variável de ambiente
 5. Configure rewrite rule para SPA:
    - Source: `/*`
    - Destination: `/index.html`
    - Action: `Rewrite`
+
+#### Se precisar forçar uma URL customizada
+
+Crie um arquivo `frontend/.env` no Render (variável de ambiente):
+```env
+VITE_API_BASE_URL=https://seu-backend-customizado.com
+```
+
+#### Para Desenvolvimento Local
+
+Opcional - crie `frontend/.env`:
+```env
+VITE_API_BASE_URL=http://localhost:3000
+```
 
 ## 🐛 Troubleshooting
 
