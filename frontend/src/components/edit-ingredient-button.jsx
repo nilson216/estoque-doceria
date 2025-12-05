@@ -21,19 +21,30 @@ const EditIngredientButton = ({ ingredient, onUpdated } = {}) => {
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
+  // Normalize date for input without timezone shifts
+  const toDateInputValue = (value) => {
+    if (!value) return ''
+    if (typeof value === 'string') return value.split('T')[0] || value
+    try {
+      return value.toISOString().slice(0, 10)
+    } catch {
+      return ''
+    }
+  }
+
   // local form state initialized from ingredient
   const [name, setName] = useState(ingredient?.name || '')
   const [unit, setUnit] = useState(ingredient?.unit || '')
   const [stockQuantity, setStockQuantity] = useState(ingredient?.stockQuantity ?? 0)
   const [observacao, setObservacao] = useState(ingredient?.observacao || '')
-  const [expiryDate, setExpiryDate] = useState(ingredient?.expiryDate ? new Date(ingredient.expiryDate).toISOString().slice(0,10) : '')
+  const [expiryDate, setExpiryDate] = useState(toDateInputValue(ingredient?.expiryDate))
 
   const resetState = () => {
     setName(ingredient?.name || '')
     setUnit(ingredient?.unit || '')
     setStockQuantity(ingredient?.stockQuantity ?? 0)
     setObservacao(ingredient?.observacao || '')
-    setExpiryDate(ingredient?.expiryDate ? new Date(ingredient.expiryDate).toISOString().slice(0,10) : '')
+    setExpiryDate(toDateInputValue(ingredient?.expiryDate))
   }
 
   const handleSubmit = async (e) => {

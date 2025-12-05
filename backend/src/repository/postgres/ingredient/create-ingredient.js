@@ -1,5 +1,19 @@
 import { prisma } from '../../../../prisma/prisma.js';
 
+// Normalize expiry date to UTC midnight to avoid timezone shifts
+const normalizeExpiryDate = (value) => {
+    if (!value) return null;
+    if (value instanceof Date) {
+        return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
+    }
+    if (typeof value === 'string') {
+        const [year, month, day] = value.split('-').map(Number);
+        if (!year || !month || !day) return null;
+        return new Date(Date.UTC(year, month - 1, day));
+    }
+    return null;
+};
+
 /*
     PostgresCreateIngredientRepository
     - Responsabilidade: persistir um novo Ingredient e, opcionalmente, criar um Movement inicial
@@ -20,8 +34,7 @@ export class PostgresCreateIngredientRepository {
         }
         if (initialMovement && userId) {
             return await prisma.$transaction(async (tx) => {
-                // Usa a data de validade exatamente como fornecida (sem conversão UTC que causa deslocamento)
-                const expiry = createIngredientParams.expiryDate ?? null;
+                const expiry = normalizeExpiryDate(createIngredientParams.expiryDate);
                 const owner = userId ?? null
                 const existing = await tx.ingredient.findFirst({
                     where: {
@@ -94,7 +107,7 @@ export class PostgresCreateIngredientRepository {
                 unit: createIngredientParams.unit,
                 stockQuantity: createIngredientParams.stockQuantity ?? 0,
                 observacao: createIngredientParams.observacao ?? null,
-                expiryDate: createIngredientParams.expiryDate ?? null,
+                expiryDate: normalizeExpiryDate(createIngredientParams.expiryDate),
                 userId: userId ?? null,
             },
         });

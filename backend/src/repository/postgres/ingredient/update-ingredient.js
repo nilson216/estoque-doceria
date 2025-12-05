@@ -2,6 +2,20 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../../../../prisma/prisma.js';
 import { IngredientNotFoundError } from '../../../errors/ingredient.js';
 
+// Normalize expiry date to UTC midnight to avoid timezone shifts
+const normalizeExpiryDate = (value) => {
+    if (!value) return null;
+    if (value instanceof Date) {
+        return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
+    }
+    if (typeof value === 'string') {
+        const [year, month, day] = value.split('-').map(Number);
+        if (!year || !month || !day) return null;
+        return new Date(Date.UTC(year, month - 1, day));
+    }
+    return null;
+};
+
 export class PostgresUpdateIngredientRepository {
     // accept optional tx (prisma client) so this method can participate in transactions
     // `userId` is required to ensure only the owner can update their ingredient.
@@ -19,6 +33,10 @@ export class PostgresUpdateIngredientRepository {
             } else if (Object.prototype.hasOwnProperty.call(data, 'stockQuantity')) {
                 // strip stock updates from external callers
                 delete data.stockQuantity;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(data, 'expiryDate')) {
+                data.expiryDate = normalizeExpiryDate(data.expiryDate);
             }
 
             // If no updatable fields remain, return the current ingredient without performing an update
