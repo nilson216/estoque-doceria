@@ -42,23 +42,18 @@ const columnsDef = [
         cell: ({ getValue }) => {
             const val = getValue()
             if (!val) return '-'
-            let isoDate = ''
             if (typeof val === 'string') {
-                isoDate = val.includes('T') ? val.split('T')[0] : val
-            } else {
-                try {
-                    isoDate = val.toISOString().slice(0, 10)
-                } catch {
-                    return '-'
-                }
+                const iso = val.includes('T') ? val.split('T')[0] : val
+                const [year, month, day] = iso.split('-')
+                return `${day}/${month}/${year}`
             }
-            const [year, month, day] = isoDate.split('-')
-            const date = new Date(year, parseInt(month) - 1, parseInt(day))
-            date.setDate(date.getDate() + 1)
-            const newDay = String(date.getDate()).padStart(2, '0')
-            const newMonth = String(date.getMonth() + 1).padStart(2, '0')
-            const newYear = date.getFullYear()
-            return `${newDay}/${newMonth}/${newYear}`
+            try {
+                const iso = val.toISOString().slice(0, 10)
+                const [year, month, day] = iso.split('-')
+                return `${day}/${month}/${year}`
+            } catch {
+                return '-'
+            }
         },
     },
     {
