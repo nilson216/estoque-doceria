@@ -206,7 +206,7 @@ const AddIngredientButton = ({ onCreated } = {}) => {
           {/* Validade */}
           <div className="flex flex-col space-y-2">
             <Label htmlFor="expiryDate">Data de Validade</Label>
-            <Input id="expiryDate" name="expiryDate" type="date" />
+            <Input id="expiryDate" name="expiryDate" type="date" lang="pt-BR" />
           </div>
 
           <div className="flex flex-col space-y-2">

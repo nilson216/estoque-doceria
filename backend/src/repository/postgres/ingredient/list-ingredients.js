@@ -22,14 +22,31 @@ export class PostgresListIngredientsRepository {
 
         if (createdFrom || createdTo) {
             where.createdAt = {}
-            if (createdFrom) where.createdAt.gte = new Date(createdFrom)
-            if (createdTo) where.createdAt.lte = new Date(createdTo)
+            if (createdFrom) {
+                // Parse YYYY-MM-DD and set to 00:00:00 UTC
+                const fromDate = new Date(createdFrom)
+                where.createdAt.gte = fromDate
+            }
+            if (createdTo) {
+                // Parse YYYY-MM-DD, add 1 day, set to 00:00:00 UTC (to include entire day)
+                const toDate = new Date(createdTo)
+                toDate.setUTCDate(toDate.getUTCDate() + 1)
+                where.createdAt.lt = toDate
+            }
         }
 
         if (expiryFrom || expiryTo) {
             where.expiryDate = where.expiryDate || {}
-            if (expiryFrom) where.expiryDate.gte = new Date(expiryFrom)
-            if (expiryTo) where.expiryDate.lte = new Date(expiryTo)
+            if (expiryFrom) {
+                const fromDate = new Date(expiryFrom)
+                where.expiryDate.gte = fromDate
+            }
+            if (expiryTo) {
+                // Add 1 day to include entire day
+                const toDate = new Date(expiryTo)
+                toDate.setUTCDate(toDate.getUTCDate() + 1)
+                where.expiryDate.lt = toDate
+            }
         }
 
         const [total, items] = await Promise.all([

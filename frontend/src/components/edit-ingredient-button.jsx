@@ -112,7 +112,7 @@ const EditIngredientButton = ({ ingredient, onUpdated } = {}) => {
 
           <div className="flex flex-col space-y-2">
             <Label htmlFor={`expiry-${ingredient.id}`}>Data de Validade</Label>
-            <Input id={`expiry-${ingredient.id}`} type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
+            <Input id={`expiry-${ingredient.id}`} type="date" lang="pt-BR" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
           </div>
 
           <div className="flex flex-col space-y-2">

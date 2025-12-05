@@ -8,8 +8,16 @@ export class PostgresMovementSummaryRepository {
 
         const whereBase = { ingredientId, ingredient: { userId } };
         if (from || to) whereBase.createdAt = {};
-        if (from) whereBase.createdAt.gte = new Date(from);
-        if (to) whereBase.createdAt.lte = new Date(to);
+        if (from) {
+            const fromDate = new Date(from)
+            whereBase.createdAt.gte = fromDate
+        }
+        if (to) {
+            // Add 1 day to include entire day
+            const toDate = new Date(to)
+            toDate.setUTCDate(toDate.getUTCDate() + 1)
+            whereBase.createdAt.lt = toDate
+        }
 
         const [entradasAgg, saidasAgg] = await Promise.all([
             prisma.movement.aggregate({ where: { ...whereBase, type: 'ENTRADA' }, _sum: { quantity: true } }),
