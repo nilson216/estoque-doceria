@@ -20,25 +20,8 @@ export class PostgresCreateIngredientRepository {
         }
         if (initialMovement && userId) {
             return await prisma.$transaction(async (tx) => {
-                let expiry = null;
-                const rawExpiry = createIngredientParams.expiryDate;
-                if (rawExpiry) {
-                    if (rawExpiry instanceof Date) {
-                        if (!isNaN(rawExpiry.getTime())) {
-                            expiry = new Date(Date.UTC(rawExpiry.getFullYear(), rawExpiry.getMonth(), rawExpiry.getDate()));
-                        }
-                    } else if (typeof rawExpiry === 'string') {
-                        const m = rawExpiry.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-                        if (m) {
-                            expiry = new Date(`${m[1]}-${m[2]}-${m[3]}T00:00:00.000Z`);
-                        } else {
-                            const parsed = new Date(rawExpiry);
-                            if (!isNaN(parsed.getTime())) {
-                                expiry = new Date(Date.UTC(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()));
-                            }
-                        }
-                    }
-                }
+                // Usa a data de validade exatamente como fornecida (sem conversão UTC que causa deslocamento)
+                const expiry = createIngredientParams.expiryDate ?? null;
                 const owner = userId ?? null
                 const existing = await tx.ingredient.findFirst({
                     where: {
