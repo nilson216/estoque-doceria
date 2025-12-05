@@ -41,7 +41,16 @@ const columnsDef = [
         meta: { className: 'hidden md:table-cell' },
         cell: ({ getValue }) => {
             const val = getValue()
-            return val ? new Date(val).toLocaleDateString() : '-'
+            if (!val) return '-'
+            if (typeof val === 'string') {
+                const iso = val.includes('T') ? val.split('T')[0] : val
+                return iso
+            }
+            try {
+                return val.toISOString().slice(0, 10)
+            } catch {
+                return '-'
+            }
         },
     },
     {
