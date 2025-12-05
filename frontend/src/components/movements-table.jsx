@@ -15,7 +15,24 @@ const baseColumns = [
   }},
   { accessorKey: 'quantity', header: 'Quantidade' },
   { accessorKey: 'observacao', header: 'Observação', meta: { className: 'hidden sm:table-cell' }, cell: ({ getValue }) => getValue() || '-' },
-  { accessorKey: 'createdAt', header: 'Data', cell: ({ getValue }) => new Date(getValue()).toLocaleString() },
+  { accessorKey: 'createdAt', header: 'Data', cell: ({ getValue }) => {
+      const val = getValue()
+      if (!val) return '-'
+      let isoDate = ''
+      if (typeof val === 'string') {
+          isoDate = val
+      } else {
+          try {
+              isoDate = val.toISOString()
+          } catch {
+              return '-'
+          }
+      }
+      const [datePart, timePart] = isoDate.split('T')
+      const [year, month, day] = datePart.split('-')
+      const time = timePart ? timePart.slice(0, 8) : '00:00:00'
+      return `${day}/${month}/${year} ${time}`
+  }},
 ]
 
 const MovementsTable = ({ ingredientId, refreshSignal } = {}) => {
@@ -94,7 +111,24 @@ const MovementsTable = ({ ingredientId, refreshSignal } = {}) => {
                   <div className="mt-2 text-sm">
                     <div>Tipo: <strong>{mv.type === 'ENTRADA' ? 'Entrada' : 'Saída'}</strong></div>
                     <div>Quantidade: <strong>{mv.quantity}</strong></div>
-                    <div>Data: <strong>{new Date(mv.createdAt).toLocaleString()}</strong></div>
+                    <div>Data: <strong>{(() => {
+                        const val = mv.createdAt
+                        if (!val) return '-'
+                        let isoDate = ''
+                        if (typeof val === 'string') {
+                            isoDate = val
+                        } else {
+                            try {
+                                isoDate = val.toISOString()
+                            } catch {
+                                return '-'
+                            }
+                        }
+                        const [datePart, timePart] = isoDate.split('T')
+                        const [year, month, day] = datePart.split('-')
+                        const time = timePart ? timePart.slice(0, 8) : '00:00:00'
+                        return `${day}/${month}/${year} ${time}`
+                    })()}</strong></div>
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setConfirmOpen(false)}>Cancelar</Button>
